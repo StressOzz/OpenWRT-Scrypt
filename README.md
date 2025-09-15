@@ -13,12 +13,12 @@
 
 ### Отключить IPv6
 ```
-sh <(wget -O - https://raw.githubusercontent.com/StressOzz/OpenWRT-Scrypt/main/OpenWRT-IPv6-OFF)
+sh <(wget -O - https://raw.githubusercontent.com/StressOzz/OpenWRT-Scrypt/main/OpenWRT-IPv6-OFF.sh)
 ```
 
 ### Включить IPv6
 ```
-sh <(wget -O - https://raw.githubusercontent.com/StressOzz/OpenWRT-Scrypt/main/OpenWRT-IPv6-ON)
+sh <(wget -O - https://raw.githubusercontent.com/StressOzz/OpenWRT-Scrypt/main/OpenWRT-IPv6-ON.sh)
 ```
 
 ### Примечание
