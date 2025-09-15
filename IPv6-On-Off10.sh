@@ -20,7 +20,7 @@ if ip -6 addr show | grep -q "inet6"; then
     echo -e "${GREEN}[INFO]${RESET} IPv6 ${GREEN}включён.${RESET}"
 else
     IPV6_STATE="disabled"
-    echo -e "${RED}[INFO]${RESET} IPv6 ${GREEN}отключён.${RESET}"
+    echo -e "${RED}[INFO]${RESET} IPv6 ${RED}отключён.${RESET}"
 fi
 
 # --- Меню ---
