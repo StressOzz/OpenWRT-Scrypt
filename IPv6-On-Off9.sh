@@ -1,7 +1,6 @@
 #!/bin/sh
 # ==========================================
 #  IPv6 TOGGLE MENU SCRIPT for OpenWRT 24+
-#  Автоопределение LAN-интерфейса
 # ==========================================
 
 # Цвета
@@ -14,21 +13,14 @@ RESET="\033[0m"
 
 clear
 
-# --- Автоопределяем LAN-интерфейс ---
-LAN_IF=$(uci get network.lan.ifname 2>/dev/null)
-if [ -z "$LAN_IF" ]; then
-    # Если uci не вернул значение, пробуем стандартный br-lan
-    LAN_IF="br-lan"
-fi
-
-# Проверяем текущее состояние IPv6 (глобальный адрес на LAN)
-echo -e "${CYAN}[INFO]${RESET} Проверяем текущее состояние IPv6 на интерфейсе ${LAN_IF}..."
-if ip -6 addr show dev "$LAN_IF" 2>/dev/null | grep -q "scope global"; then
+# Проверяем текущее состояние IPv6
+echo -e "${CYAN}[INFO]${RESET} Проверяем текущее состояние IPv6..."
+if ip -6 addr show | grep -q "inet6"; then
     IPV6_STATE="enabled"
     echo -e "${GREEN}[INFO]${RESET} IPv6 ${GREEN}включён.${RESET}"
 else
     IPV6_STATE="disabled"
-    echo -e "${RED}[INFO]${RESET} IPv6 ${RED}отключён.${RESET}"
+    echo -e "${RED}[INFO]${RESET} IPv6 ${GREEN}отключён.${RESET}"
 fi
 
 # --- Меню ---
@@ -78,11 +70,6 @@ case "$CHOICE" in
             sed -i '/^net.ipv6.conf.all.disable_ipv6=/d' /etc/sysctl.conf
             sed -i '/^net.ipv6.conf.default.disable_ipv6=/d' /etc/sysctl.conf
             sed -i '/^net.ipv6.conf.lo.disable_ipv6=/d' /etc/sysctl.conf
-            cat >> /etc/sysctl.conf <<EOF
-net.ipv6.conf.all.disable_ipv6=0
-net.ipv6.conf.default.disable_ipv6=0
-net.ipv6.conf.lo.disable_ipv6=0
-EOF
             sysctl -w net.ipv6.conf.all.disable_ipv6=0 >/dev/null 2>&1
             sysctl -w net.ipv6.conf.default.disable_ipv6=0 >/dev/null 2>&1
             sysctl -w net.ipv6.conf.lo.disable_ipv6=0 >/dev/null 2>&1
@@ -157,8 +144,8 @@ EOF
 esac
 
 # --- Проверка ---
-echo -e "${YELLOW}[*]${RESET} Проверяем IPv6 на интерфейсе ${LAN_IF}:"
-if ip -6 addr show dev "$LAN_IF" 2>/dev/null | grep -q "scope global"; then
+echo -e "${YELLOW}[*]${RESET} Проверяем IPv6 на интерфейсах роутера:"
+if ip -6 addr show | grep -q "inet6"; then
     echo -e "${GREEN}[PASS]${RESET} IPv6 ${GREEN}включён.${RESET}"
 else
     echo -e "${RED}[PASS]${RESET} IPv6 ${RED}отключён.${RESET}"
