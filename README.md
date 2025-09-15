@@ -20,3 +20,10 @@ bash <(curl -sSL https://raw.githubusercontent.com/StressOzz/OpenWRT-Scrypt/main
 ```
 bash <(curl -sSL https://raw.githubusercontent.com/StressOzz/OpenWRT-Scrypt/main/OpenWRT-IPv6-ON)
 ```
+
+### Примечание
+
+Для надёжности рекомендуется перезагрузить роутер:
+```
+reboot
+```
