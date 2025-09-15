@@ -57,8 +57,8 @@ case "$CHOICE" in
             uci delete dhcp.@dnsmasq[0].filter_aaaa 2>/dev/null
 
             # --- Commit ---
-            uci commit network
-            uci commit dhcp
+            uci commit network >/dev/null 2>&1
+            uci commit dhcp >/dev/null 2>&1
 
             # --- odhcpd ---
             echo -e "${YELLOW}[*]${RESET} Запускаем odhcpd"
@@ -75,7 +75,7 @@ case "$CHOICE" in
             sysctl -w net.ipv6.conf.lo.disable_ipv6=0
 
             # --- Restart DNS ---
-            /etc/init.d/dnsmasq restart
+            /etc/init.d/dnsmasq restart >/dev/null 2>&1
 
             echo -e "${GREEN}[OK]${RESET} IPv6 включён!"
         fi
@@ -105,13 +105,13 @@ case "$CHOICE" in
             uci set dhcp.@dnsmasq[0].filter_aaaa='1'
 
             # --- Commit ---
-            uci commit network
-            uci commit dhcp
+            uci commit network >/dev/null 2>&1
+            uci commit dhcp >/dev/null 2>&1
 
             # --- odhcpd ---
             echo -e "${YELLOW}[*]${RESET} Останавливаем odhcpd"
-            /etc/init.d/odhcpd stop
-            /etc/init.d/odhcpd disable
+            /etc/init.d/odhcpd stop >/dev/null 2>&1
+            /etc/init.d/odhcpd disable >/dev/null 2>&1
 
             # --- sysctl ---
             echo -e "${YELLOW}[*]${RESET} Запрещаем IPv6 на уровне ядра"
@@ -128,7 +128,7 @@ EOF
             sysctl -w net.ipv6.conf.lo.disable_ipv6=1
 
             # --- Restart DNS ---
-            /etc/init.d/dnsmasq restart
+            /etc/init.d/dnsmasq restart >/dev/null 2>&1
 
             echo -e "${GREEN}[OK]${RESET} IPv6 отключён!"
         fi
