@@ -144,10 +144,11 @@ EOF
 esac
 
 # --- Проверка ---
+echo -e "${YELLOW}[*]${RESET} Проверяем IPv6 на интерфейсах роутера:"
 if ip -6 addr show | grep -q "inet6"; then
-    echo -e "${GREEN}[PASS]${RESET} IPv6 включён."
+    echo -e "${GREEN}[PASS]${RESET} IPv6 ${GREEN}включён.${RESET}"
 else
-    echo -e "${RED}[PASS]${RESET} IPv6 отключён."
+    echo -e "${RED}[PASS]${RESET} IPv6 ${RED}отключён.${RESET}"
 fi
 
 echo -e "${CYAN}[INFO]${RESET} Скрипт завершён. Рекомендуется перезагрузка роутера."
