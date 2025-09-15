@@ -17,6 +17,9 @@
 sh <(wget -O - https://raw.githubusercontent.com/StressOzz/OpenWRT-Scrypt/main/IPv6-On-Off.sh)
 ```
 
+---
+# Можно запустить отдельно:
+
 ### Отключить IPv6
 ```
 sh <(wget -O - https://raw.githubusercontent.com/StressOzz/OpenWRT-Scrypt/main/OpenWRT-IPv6-OFF.sh)
