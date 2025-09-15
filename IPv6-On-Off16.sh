@@ -78,7 +78,6 @@ case "$CHOICE" in
             # --- Restart DNS ---
             /etc/init.d/dnsmasq restart >/dev/null 2>&1
 
-            echo -e "${GREEN}✅${RESET} IPv6 включён!"
         fi
         ;;
     2)
@@ -131,7 +130,6 @@ EOF
             # --- Restart DNS ---
             /etc/init.d/dnsmasq restart >/dev/null 2>&1
 
-            echo -e "${GREEN}✅${RESET} IPv6 отключён!"
         fi
         ;;
     0)
