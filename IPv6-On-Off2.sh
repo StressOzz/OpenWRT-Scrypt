@@ -17,15 +17,15 @@ clear
 echo -e "${CYAN}[INFO]${RESET} Проверяем текущее состояние IPv6..."
 if ip -6 addr show | grep -q "inet6"; then
     IPV6_STATE="enabled"
-    echo -e "${GREEN}[INFO]${RESET} IPv6 включён."
+    echo -e "${GREEN}[INFO]${RESET} IPv6 ${GREEN}включён.${RESET}"
 else
     IPV6_STATE="disabled"
-    echo -e "${RED}[INFO]${RESET} IPv6 отключён."
+    echo -e "${RED}[INFO]${RESET} IPv6 ${GREEN}отключён.${RESET}"
 fi
 
 # --- Меню ---
 echo -e "${MAGENTA}╔══════════════════════════════════╗${RESET}"
-echo -e "${MAGENTA}║${CYAN}          IPv6 TOGGLE MENU        ${MAGENTA}║${RESET}"
+echo -e "${MAGENTA}║${CYAN}     Управление IPv6 (OpenWRT)    ${MAGENTA}║${RESET}"
 echo -e "${MAGENTA}╠══════════════════════════════════╣${RESET}"
 echo -e "${MAGENTA}║${GREEN} 1) Включить IPv6                 ${MAGENTA}║${RESET}"
 echo -e "${MAGENTA}║${RED} 2) Выключить IPv6                ${MAGENTA}║${RESET}"
