@@ -14,13 +14,13 @@ RESET="\033[0m"
 clear
 
 # Проверяем текущее состояние IPv6
-echo -e "${CYAN}ℹ️${RESET} Проверяем текущее состояние IPv6..."
+echo -e "${CYAN}🔹${RESET} Проверяем текущее состояние IPv6..."
 if ip -6 addr show | grep -q "inet6"; then
     IPV6_STATE="enabled"
-    echo -e "${GREEN}ℹ️${RESET} IPv6 ${GREEN}включён.${RESET}"
+    echo -e "${GREEN}🔹${RESET} IPv6 ${GREEN}включён.${RESET}"
 else
     IPV6_STATE="disabled"
-    echo -e "${RED}ℹ️${RESET} IPv6 ${RED}отключён.${RESET}"
+    echo -e "${RED}🔹${RESET} IPv6 ${RED}отключён.${RESET}"
 fi
 
 # --- Меню ---
@@ -39,7 +39,7 @@ case "$CHOICE" in
         if [ "$IPV6_STATE" = "enabled" ]; then
             echo -e "${YELLOW}❗${RESET} IPv6 уже включён."
         else
-            echo -e "${CYAN}ℹ️${RESET} Включаем IPv6..."
+            echo -e "${CYAN}🔹${RESET} Включаем IPv6..."
 
             # --- Network ---
             echo -e "${YELLOW}🔹${RESET} LAN/WAN IPv6 включаем"
@@ -84,7 +84,7 @@ case "$CHOICE" in
         if [ "$IPV6_STATE" = "disabled" ]; then
             echo -e "${YELLOW}❗${RESET} IPv6 уже отключён."
         else
-            echo -e "${CYAN}ℹ️${RESET} Отключаем IPv6..."
+            echo -e "${CYAN}🔹${RESET} Отключаем IPv6..."
 
             # --- Network ---
             echo -e "${YELLOW}🔹${RESET} LAN/WAN IPv6 отключаем"
@@ -134,7 +134,7 @@ EOF
         fi
         ;;
     0)
-        echo -e "${CYAN}ℹ️${RESET} Действие отменено пользователем. Выход."
+        echo -e "${CYAN}🔹${RESET} Действие отменено пользователем. Выход."
         exit 0
         ;;
     *)
@@ -151,4 +151,4 @@ else
     echo -e "${RED}[PASS]${RESET} IPv6 ${RED}отключён.${RESET}"
 fi
 
-echo -e "${CYAN}ℹ️${RESET} Скрипт завершён. Рекомендуется перезагрузка роутера."
+echo -e "${CYAN}🔹${RESET} Скрипт завершён. Рекомендуется перезагрузка роутера."
