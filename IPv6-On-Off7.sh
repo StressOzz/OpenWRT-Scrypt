@@ -13,14 +13,14 @@ RESET="\033[0m"
 
 clear
 
-# Проверяем текущее состояние IPv6
+# Проверяем текущее состояние IPv6 (глобальный адрес на LAN)
 echo -e "${CYAN}[INFO]${RESET} Проверяем текущее состояние IPv6..."
-if ip -6 addr show | grep -q "inet6"; then
+if ip -6 addr show dev lan | grep -q "scope global"; then
     IPV6_STATE="enabled"
     echo -e "${GREEN}[INFO]${RESET} IPv6 ${GREEN}включён.${RESET}"
 else
     IPV6_STATE="disabled"
-    echo -e "${RED}[INFO]${RESET} IPv6 ${GREEN}отключён.${RESET}"
+    echo -e "${RED}[INFO]${RESET} IPv6 ${RED}отключён.${RESET}"
 fi
 
 # --- Меню ---
@@ -70,6 +70,11 @@ case "$CHOICE" in
             sed -i '/^net.ipv6.conf.all.disable_ipv6=/d' /etc/sysctl.conf
             sed -i '/^net.ipv6.conf.default.disable_ipv6=/d' /etc/sysctl.conf
             sed -i '/^net.ipv6.conf.lo.disable_ipv6=/d' /etc/sysctl.conf
+            cat >> /etc/sysctl.conf <<EOF
+net.ipv6.conf.all.disable_ipv6=0
+net.ipv6.conf.default.disable_ipv6=0
+net.ipv6.conf.lo.disable_ipv6=0
+EOF
             sysctl -w net.ipv6.conf.all.disable_ipv6=0 >/dev/null 2>&1
             sysctl -w net.ipv6.conf.default.disable_ipv6=0 >/dev/null 2>&1
             sysctl -w net.ipv6.conf.lo.disable_ipv6=0 >/dev/null 2>&1
@@ -144,8 +149,8 @@ EOF
 esac
 
 # --- Проверка ---
-echo -e "${YELLOW}[*]${RESET} Проверяем IPv6 на интерфейсах роутера:"
-if ip -6 addr show | grep -q "inet6"; then
+echo -e "${YELLOW}[*]${RESET} Проверяем IPv6 на LAN-интерфейсе роутера:"
+if ip -6 addr show dev lan | grep -q "scope global"; then
     echo -e "${GREEN}[PASS]${RESET} IPv6 ${GREEN}включён.${RESET}"
 else
     echo -e "${RED}[PASS]${RESET} IPv6 ${RED}отключён.${RESET}"
