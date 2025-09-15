@@ -9,12 +9,13 @@ GREEN="\033[1;32m"
 CYAN="\033[1;36m"
 YELLOW="\033[1;33m"
 MAGENTA="\033[1;35m"
+BLUE="\033[1;34m"
 RESET="\033[0m"
 
 clear
 
 # Проверяем текущее состояние IPv6
-echo -e "${CYAN}🔹${RESET} Проверяем текущее состояние IPv6..."
+echo -e "${BLUE}🔹${RESET} Проверяем текущее состояние IPv6..."
 if ip -6 addr show | grep -q "inet6"; then
     IPV6_STATE="enabled"
     echo -e "${GREEN}🔹${RESET} IPv6 ${GREEN}включён.${RESET}"
@@ -39,7 +40,7 @@ case "$CHOICE" in
         if [ "$IPV6_STATE" = "enabled" ]; then
             echo -e "${YELLOW}❗${RESET} IPv6 уже включён."
         else
-            echo -e "${CYAN}🔹${RESET} Включаем IPv6..."
+            echo -e "${BLUE}🔹${RESET} Включаем IPv6..."
 
             # --- Network ---
             echo -e "${YELLOW}🔹${RESET} LAN/WAN IPv6 включаем"
@@ -144,11 +145,11 @@ EOF
 esac
 
 # --- Проверка ---
-echo -e "${YELLOW}🔹${RESET} Проверяем IPv6 на интерфейсах роутера:"
+echo -e "${BLUE}🔹${RESET} Проверяем IPv6 на интерфейсах роутера:"
 if ip -6 addr show | grep -q "inet6"; then
-    echo -e "${GREEN}[PASS]${RESET} IPv6 ${GREEN}включён.${RESET}"
+    echo -e "${GREEN}✅${RESET} IPv6 ${GREEN}включён.${RESET}"
 else
-    echo -e "${RED}[PASS]${RESET} IPv6 ${RED}отключён.${RESET}"
+    echo -e "${RED}✅${RESET} IPv6 ${RED}отключён.${RESET}"
 fi
 
-echo -e "${CYAN}🔹${RESET} Скрипт завершён. Рекомендуется перезагрузка роутера."
+echo -e "${BLUE}🔹${RESET} Скрипт завершён. Рекомендуется перезагрузка роутера."
