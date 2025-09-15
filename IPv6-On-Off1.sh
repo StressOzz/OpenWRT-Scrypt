@@ -11,6 +11,8 @@ YELLOW="\033[1;33m"
 MAGENTA="\033[1;35m"
 RESET="\033[0m"
 
+clear
+
 # Проверяем текущее состояние IPv6
 echo -e "${CYAN}[INFO]${RESET} Проверяем текущее состояние IPv6..."
 if ip -6 addr show | grep -q "inet6"; then
