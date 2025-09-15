@@ -70,9 +70,9 @@ case "$CHOICE" in
             sed -i '/^net.ipv6.conf.all.disable_ipv6=/d' /etc/sysctl.conf
             sed -i '/^net.ipv6.conf.default.disable_ipv6=/d' /etc/sysctl.conf
             sed -i '/^net.ipv6.conf.lo.disable_ipv6=/d' /etc/sysctl.conf
-            sysctl -w net.ipv6.conf.all.disable_ipv6=0
-            sysctl -w net.ipv6.conf.default.disable_ipv6=0
-            sysctl -w net.ipv6.conf.lo.disable_ipv6=0
+            sysctl -w net.ipv6.conf.all.disable_ipv6=0 >/dev/null 2>&1
+            sysctl -w net.ipv6.conf.default.disable_ipv6=0 >/dev/null 2>&1
+            sysctl -w net.ipv6.conf.lo.disable_ipv6=0 >/dev/null 2>&1
 
             # --- Restart DNS ---
             /etc/init.d/dnsmasq restart >/dev/null 2>&1
@@ -123,9 +123,9 @@ net.ipv6.conf.all.disable_ipv6=1
 net.ipv6.conf.default.disable_ipv6=1
 net.ipv6.conf.lo.disable_ipv6=1
 EOF
-            sysctl -w net.ipv6.conf.all.disable_ipv6=1
-            sysctl -w net.ipv6.conf.default.disable_ipv6=1
-            sysctl -w net.ipv6.conf.lo.disable_ipv6=1
+            sysctl -w net.ipv6.conf.all.disable_ipv6=1 >/dev/null 2>&1
+            sysctl -w net.ipv6.conf.default.disable_ipv6=1 >/dev/null 2>&1
+            sysctl -w net.ipv6.conf.lo.disable_ipv6=1 >/dev/null 2>&1
 
             # --- Restart DNS ---
             /etc/init.d/dnsmasq restart >/dev/null 2>&1
