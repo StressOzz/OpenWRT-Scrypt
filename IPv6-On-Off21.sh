@@ -38,7 +38,7 @@ read -r CHOICE
 case "$CHOICE" in
     1)
         if [ "$IPV6_STATE" = "enabled" ]; then
-            echo -e "${RED}⚡${RESET} IPv6 уже включён."
+            echo -e "${RED}🔹${RESET} IPv6 уже включён."
         else
             echo -e "${BLUE}🔹${RESET} Включаем IPv6..."
 
@@ -82,7 +82,7 @@ case "$CHOICE" in
         ;;
     2)
         if [ "$IPV6_STATE" = "disabled" ]; then
-            echo -e "${RED}⚡${RESET} IPv6 уже отключён."
+            echo -e "${RED}🔹${RESET} IPv6 уже отключён."
         else
             echo -e "${CYAN}🔹${RESET} Отключаем IPv6..."
 
