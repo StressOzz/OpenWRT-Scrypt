@@ -29,7 +29,7 @@ echo -e "${MAGENTA}║${CYAN}          IPv6 TOGGLE MENU        ${MAGENTA}║${RE
 echo -e "${MAGENTA}╠══════════════════════════════════╣${RESET}"
 echo -e "${MAGENTA}║${GREEN} 1) Включить IPv6                 ${MAGENTA}║${RESET}"
 echo -e "${MAGENTA}║${RED} 2) Выключить IPv6                ${MAGENTA}║${RESET}"
-echo -e "${MAGENTA}║${YELLOW} 0) Отмена                         ${MAGENTA}║${RESET}"
+echo -e "${MAGENTA}║${YELLOW} 0) Отмена                        ${MAGENTA}║${RESET}"
 echo -e "${MAGENTA}╚══════════════════════════════════╝${RESET}"
 echo -n -e "${YELLOW}Выберите опцию [0-2]: ${RESET}"
 read -r CHOICE
@@ -144,7 +144,6 @@ EOF
 esac
 
 # --- Проверка ---
-echo -e "${CYAN}[CHECK]${RESET} Состояние IPv6 после изменений:"
 if ip -6 addr show | grep -q "inet6"; then
     echo -e "${GREEN}[PASS]${RESET} IPv6 включён."
 else
