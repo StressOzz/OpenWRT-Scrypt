@@ -76,7 +76,7 @@ for pkg in zapret luci-app-zapret; do
     if opkg list-installed | grep -q "^$pkg"; then
         echo -e "${CYAN}$pkg ${RED}установлен!${NC}"
     else
-        echo -e "${CYAN}$pkg ${RED}удалён${NC}"
+        echo -e "${CYAN}$pkg ${GREEN}удалён${NC}"
     fi
 done
 
@@ -91,8 +91,11 @@ ipset list -n 2>/dev/null | grep -i zapret \
   || echo -e "${CYAN}Не найдено${NC}"
 
 echo -e "${YELLOW}Cron-задания zapret:${NC}"
-crontab -l | grep -i zapret \
+(crontab -l 2>/dev/null | grep -i zapret) \
   && echo -e "${RED}Есть записи в cron!${NC}" \
+  || echo -e "${CYAN}Не найдено${NC}"
+grep -i zapret /etc/crontabs/* 2>/dev/null \
+  && echo -e "${RED}Есть записи в /etc/crontabs!${NC}" \
   || echo -e "${CYAN}Не найдено${NC}"
 
 echo -e "${YELLOW}Папки и конфиги:${NC}"
@@ -100,9 +103,19 @@ for path in /opt/zapret /etc/config/zapret /etc/firewall.zapret /etc/init.d/zapr
     if [ -e "$path" ]; then
         echo -e "${CYAN}$path ${RED}ещё существует!${NC}"
     else
-        echo -e "${CYAN}$path ${RED}удалён${NC}"
+        echo -e "${CYAN}$path ${GREEN}удалён${NC}"
     fi
 done
+
+echo -e "${YELLOW}Файлы логов и остатки:${NC}"
+find /var/log /tmp /var/run -maxdepth 1 -type f -iname "*zapret*" 2>/dev/null | grep zapret \
+  && echo -e "${RED}Есть остаточные файлы!${NC}" \
+  || echo -e "${CYAN}Не найдено${NC}"
+
+echo -e "${YELLOW}NFTables правила и цепочки zapret:${NC}"
+nft list ruleset 2>/dev/null | grep -i zapret \
+  && echo -e "${RED}Остались правила или цепочки!${NC}" \
+  || echo -e "${CYAN}Не найдено${NC}"
 
 echo -e "${GREEN}${BOLD}"
 echo -e "╔════════════════════════════════════════╗"
