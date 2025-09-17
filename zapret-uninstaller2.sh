@@ -1,6 +1,6 @@
 #!/bin/sh
 # ==========================================
-# Полное и безопасное удаление zapret-openwrt
+# Полное и безопасное удаление zapret-openwrt (доработанный вариант)
 # ==========================================
 
 GREEN="\033[1;32m"
@@ -18,10 +18,13 @@ echo -e "${GREEN}Удаляем пакеты zapret и luci-app-zapret...${NC}"
 opkg remove zapret luci-app-zapret || echo -e "${YELLOW}Пакеты уже удалены или не найдены${NC}"
 
 # -----------------------
-# 2. Остановка процессов zapret
+# 2. Остановка процессов zapret через ps/kill
 # -----------------------
 echo -e "${GREEN}Останавливаем процессы zapret...${NC}"
-pkill -f zapret || echo -e "${YELLOW}Процессы не найдены${NC}"
+for pid in $(ps | grep -i /opt/zapret | grep -v grep | awk '{print $1}'); do
+    echo -e "${GREEN}Убиваем процесс PID: $pid${NC}"
+    kill -9 $pid
+done
 
 # -----------------------
 # 3. Удаление папки /opt/zapret
@@ -68,14 +71,14 @@ done
 rm -f /tmp/*zapret* /var/run/*zapret*
 
 # -----------------------
-# 8. Удаление цепочек и таблиц nftables zapret
+# 8. Удаление цепочек и таблиц nftables zapret (без ошибок)
 # -----------------------
 echo -e "${GREEN}Удаляем цепочки nftables, связанные с zapret...${NC}"
-for table in $(nft list tables | awk '{print $2}'); do
-    chains=$(nft list table $table | grep -i 'chain .*zapret' | awk '{print $2}')
+for table in $(nft list tables 2>/dev/null | awk '{print $2}'); do
+    chains=$(nft list table $table 2>/dev/null | grep -i 'chain .*zapret' | awk '{print $2}')
     for chain in $chains; do
         echo -e "${GREEN}Удаляем цепочку $chain в таблице $table${NC}"
-        nft delete chain $table $chain
+        nft delete chain $table $chain 2>/dev/null
     done
 done
 
@@ -92,8 +95,8 @@ fi
 # 10. Удаление init-скриптов и hook интерфейсов
 # -----------------------
 if [ -f "/etc/init.d/zapret" ]; then
-    echo -e "${GREEN}Удаляем init-скрипт /etc/init.d/zapret${NC}"
-    /etc/init.d/zapret disable
+    echo -e "${GREEN}Отключаем и удаляем init-скрипт /etc/init.d/zapret${NC}"
+    /etc/init.d/zapret disable 2>/dev/null
     rm -f /etc/init.d/zapret
 fi
 
@@ -110,7 +113,7 @@ fi
 echo -e "${CYAN}=== Финальный чек: проверяем, что ничего Zapret не осталось ===${NC}"
 
 echo -e "${YELLOW}Проверка процессов:${NC}"
-pgrep -fl zapret || echo -e "${GREEN}Процессов zapret не найдено${NC}"
+ps | grep -i /opt/zapret | grep -v grep || echo -e "${GREEN}Процессов zapret не найдено${NC}"
 
 echo -e "${YELLOW}Проверка ipset:${NC}"
 ipset list -n 2>/dev/null | grep -i zapret || echo -e "${GREEN}IpSet zapret не найдено${NC}"
