@@ -18,16 +18,10 @@ sh <(wget -O - https://raw.githubusercontent.com/StressOzz/OpenWRT-Scrypt/main/I
 ```
 
 ---
-# Можно запустить отдельно:
+# Удаление Zapret
 
-### Отключить IPv6
 ```
-sh <(wget -O - https://raw.githubusercontent.com/StressOzz/OpenWRT-Scrypt/main/OpenWRT-IPv6-OFF.sh)
-```
-
-### Включить IPv6
-```
-sh <(wget -O - https://raw.githubusercontent.com/StressOzz/OpenWRT-Scrypt/main/OpenWRT-IPv6-ON.sh)
+sh <(wget -O - https://raw.githubusercontent.com/StressOzz/OpenWRT-Scrypt/main/Zapret-Uninstall.sh)
 ```
 
 ### Примечание
@@ -36,3 +30,4 @@ sh <(wget -O - https://raw.githubusercontent.com/StressOzz/OpenWRT-Scrypt/main/O
 ```
 reboot
 ```
+
