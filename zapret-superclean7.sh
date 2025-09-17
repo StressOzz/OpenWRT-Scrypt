@@ -64,8 +64,6 @@ done
 # =======================
 # Финальный чек (цветной)
 # =======================
-echo -e "${CYAN}=== Финальный чек ===${NC}"
-
 echo -e "${YELLOW}Процессы zapret:${NC}"
 ps | grep -i /opt/zapret | grep -v grep \
   && echo -e "${RED}Найдены процессы!${NC}" \
@@ -84,9 +82,9 @@ crontab -l | grep -i zapret \
 echo -e "${YELLOW}Папки и конфиги:${NC}"
 for path in /opt/zapret /etc/config/zapret /etc/firewall.zapret /etc/init.d/zapret /opt/zapret/ipset; do
     if [ -e "$path" ]; then
-        echo -e "${RED}$path ещё существует!${NC}"
+        echo -e "${GREEN}$path ${RED}ещё существует!${NC}"
     else
-        echo -e "${GREEN}$path удален${NC}"
+        echo -e "${GREEN}$path ${RED}удален${NC}"
     fi
 done
 
