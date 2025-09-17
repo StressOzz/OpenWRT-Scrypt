@@ -9,9 +9,15 @@ CYAN="\033[1;36m"
 YELLOW="\033[1;33m"
 MAGENTA="\033[1;35m"
 NC="\033[0m"
+BOLD="\033[1m"
 
 clear
-echo -e "${CYAN}=== Начинаем суперчистое удаление zapret ===${NC}"
+
+echo -e "${GREEN}${BOLD}"
+echo "╔════════════════════════════════════════════════╗"
+echo "║      ${MAGENTA}Начинаем суперчистое удаление ZAPRET${GREEN}      ║"
+echo "╚════════════════════════════════════════════════╝"
+echo -e "${NC}"
 
 # 1. Удаление пакетов
 opkg remove --force-removal-of-dependent-packages zapret luci-app-zapret >/dev/null 2>&1
@@ -68,34 +74,38 @@ done
 echo -e "${YELLOW}Пакеты:${NC}"
 for pkg in zapret luci-app-zapret; do
     if opkg list-installed | grep -q "^$pkg"; then
-        echo -e "${GREEN}$pkg ${RED}установлен!${NC}"
+        echo -e "${CYAN}$pkg ${RED}установлен!${NC}"
     else
-        echo -e "${GREEN}$pkg ${RED}удалён${NC}"
+        echo -e "${CYAN}$pkg ${RED}удалён${NC}"
     fi
 done
 
 echo -e "${YELLOW}Процессы zapret:${NC}"
 ps | grep -i /opt/zapret | grep -v grep \
   && echo -e "${RED}Найдены процессы!${NC}" \
-  || echo -e "${GREEN}Не найдено${NC}"
+  || echo -e "${CYAN}Не найдено${NC}"
 
 echo -e "${YELLOW}IpSet zapret:${NC}"
 ipset list -n 2>/dev/null | grep -i zapret \
   && echo -e "${RED}IpSet найден!${NC}" \
-  || echo -e "${GREEN}Не найдено${NC}"
+  || echo -e "${CYAN}Не найдено${NC}"
 
 echo -e "${YELLOW}Cron-задания zapret:${NC}"
 crontab -l | grep -i zapret \
   && echo -e "${RED}Есть записи в cron!${NC}" \
-  || echo -e "${GREEN}Не найдено${NC}"
+  || echo -e "${CYAN}Не найдено${NC}"
 
 echo -e "${YELLOW}Папки и конфиги:${NC}"
 for path in /opt/zapret /etc/config/zapret /etc/firewall.zapret /etc/init.d/zapret /opt/zapret/ipset; do
     if [ -e "$path" ]; then
-        echo -e "${GREEN}$path ${RED}ещё существует!${NC}"
+        echo -e "${CYAN}$path ${RED}ещё существует!${NC}"
     else
-        echo -e "${GREEN}$path ${RED}удалён${NC}"
+        echo -e "${CYAN}$path ${RED}удалён${NC}"
     fi
 done
 
-echo -e "${MAGENTA}=== Удаление zapret завершено успешно! ===${NC}"
+echo -e "${GREEN}${BOLD}"
+echo "╔════════════════════════════════════════════════╗"
+echo "║       ${MAGENTA}Удаление zapret завершено успешно!${GREEN}        ║"
+echo "╚════════════════════════════════════════════════╝"
+echo -e "${NC}"
