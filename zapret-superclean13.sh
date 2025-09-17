@@ -74,38 +74,38 @@ done
 echo -e "${YELLOW}Пакеты:${NC}"
 for pkg in zapret luci-app-zapret; do
     if opkg list-installed | grep -q "^$pkg"; then
-        echo -e "${CYAN}$pkg ${RED}установлен!${NC}"
+        echo -e "    ${CYAN}$pkg ${RED}установлен!${NC}"
     else
-        echo -e "${CYAN}$pkg ${RED}удалён${NC}"
+        echo -e "    ${CYAN}$pkg ${RED}удалён${NC}"
     fi
 done
 
 echo -e "${YELLOW}Процессы zapret:${NC}"
 ps | grep -i /opt/zapret | grep -v grep \
-  && echo -e "${RED}Найдены процессы!${NC}" \
-  || echo -e "${CYAN}Не найдено${NC}"
+  && echo -e "    ${RED}Найдены процессы!${NC}" \
+  || echo -e "    ${CYAN}Не найдено${NC}"
 
 echo -e "${YELLOW}IpSet zapret:${NC}"
 ipset list -n 2>/dev/null | grep -i zapret \
-  && echo -e "${RED}IpSet найден!${NC}" \
-  || echo -e "${CYAN}Не найдено${NC}"
+  && echo -e "    ${RED}IpSet найден!${NC}" \
+  || echo -e "    ${CYAN}Не найдено${NC}"
 
 echo -e "${YELLOW}Cron-задания zapret:${NC}"
 crontab -l | grep -i zapret \
-  && echo -e "${RED}Есть записи в cron!${NC}" \
-  || echo -e "${CYAN}Не найдено${NC}"
+  && echo -e "    ${RED}Есть записи в cron!${NC}" \
+  || echo -e "    ${CYAN}Не найдено${NC}"
 
 echo -e "${YELLOW}Папки и конфиги:${NC}"
 for path in /opt/zapret /etc/config/zapret /etc/firewall.zapret /etc/init.d/zapret /opt/zapret/ipset; do
     if [ -e "$path" ]; then
-        echo -e "${CYAN}$path ${RED}ещё существует!${NC}"
+        echo -e "    ${CYAN}$path ${RED}ещё существует!${NC}"
     else
-        echo -e "${CYAN}$path ${RED}удалён${NC}"
+        echo -e "    ${CYAN}$path ${RED}удалён${NC}"
     fi
 done
 
 echo -e "${GREEN}${BOLD}"
 echo -e "╔════════════════════════════════════════════════╗"
-echo -e "║       ${MAGENTA}Удаление zapret завершено успешно!${GREEN}       ║"
+echo -e "║       ${MAGENTA}Удаление ZAPRET завершено успешно!${GREEN}       ║"
 echo -e "╚════════════════════════════════════════════════╝"
 echo -e "${NC}"
