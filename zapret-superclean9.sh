@@ -92,7 +92,7 @@ crontab -l | grep -i zapret \
 echo -e "${YELLOW}Папки и конфиги:${NC}"
 for path in /opt/zapret /etc/config/zapret /etc/firewall.zapret /etc/init.d/zapret /opt/zapret/ipset; do
     if [ -e "$path" ]; then
-        echo -e "${GREEN}$path ещё существует!${NC}"
+        echo -e "${GREEN}$path ${RED}ещё существует!${NC}"
     else
         echo -e "${GREEN}$path ${RED}удалён${NC}"
     fi
