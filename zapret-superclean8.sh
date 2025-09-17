@@ -64,6 +64,16 @@ done
 # =======================
 # Финальный чек (цветной)
 # =======================
+
+echo -e "${YELLOW}Пакеты:${NC}"
+for pkg in zapret luci-app-zapret; do
+    if opkg list-installed | grep -q "^$pkg"; then
+        echo -e "${GREEN}$pkg ${RED}установлен!${NC}"
+    else
+        echo -e "${GREEN}$pkg ${RED}удалён${NC}"
+    fi
+done
+
 echo -e "${YELLOW}Процессы zapret:${NC}"
 ps | grep -i /opt/zapret | grep -v grep \
   && echo -e "${RED}Найдены процессы!${NC}" \
@@ -82,9 +92,9 @@ crontab -l | grep -i zapret \
 echo -e "${YELLOW}Папки и конфиги:${NC}"
 for path in /opt/zapret /etc/config/zapret /etc/firewall.zapret /etc/init.d/zapret /opt/zapret/ipset; do
     if [ -e "$path" ]; then
-        echo -e "${GREEN}$path ${RED}ещё существует!${NC}"
+        echo -e "${GREEN}$path ещё существует!${NC}"
     else
-        echo -e "${GREEN}$path ${RED}удален${NC}"
+        echo -e "${GREEN}$path ${RED}удалён${NC}"
     fi
 done
 
