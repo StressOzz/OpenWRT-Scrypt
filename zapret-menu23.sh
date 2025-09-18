@@ -35,7 +35,7 @@ show_menu() {
     get_versions
     clear
 
-    echo -e "${GREEN}       ${MAGENTA}ZAPRET on remittor Manager${GREEN}${NC}"
+    echo -e "${MAGENTA}ZAPRET on remittor Manager${GREEN}${NC}"
 
     # Вывод версий с цветовой подсветкой
     if [ "$INSTALLED_VER" = "$LATEST_VER" ]; then
@@ -44,9 +44,11 @@ show_menu() {
         INST_COLOR=$RED
     fi
 
+    echo -e ""
     echo -e "${YELLOW}Установленная версия: ${INST_COLOR}$INSTALLED_VER${NC}"
     echo -e "${YELLOW}Последняя версия GitHub: ${CYAN}$LATEST_VER${NC}"
-    echo -e "${CYAN}Архитектура: $ARCH${NC}"
+    echo -e ""
+    echo -e "${YELLOW}Архитектура: ${GREEN}$ARCH${NC}"
 
     echo -e ""
     echo -e "${GREEN}1) Установить или обновить${NC}"
@@ -91,13 +93,13 @@ install_update() {
     command -v unzip >/dev/null 2>&1 || { opkg update >/dev/null 2>&1; opkg install unzip >/dev/null 2>&1; }
 
     mkdir -p "$WORKDIR" && cd "$WORKDIR" || return
-    echo -e "${CYAN}🔴 Скачиваем $LATEST_FILE...${NC}"
+    echo -e "${GREEN}🔴 ${CYAN}Скачиваем $LATEST_FILE...${NC}"
     wget -q "$LATEST_URL" -O "$LATEST_FILE"
-    echo -e "${CYAN}🔴 Распаковываем...${NC}"
+    echo -e "${GREEN}🔴 ${CYAN}Распаковываем...${NC}"
     unzip -o "$LATEST_FILE" >/dev/null
 
     for PKG in zapret_*.ipk luci-app-zapret_*.ipk; do
-        [ -f "$PKG" ] && { echo -e "${CYAN}🔴 Установка $PKG...${NC}"; opkg install --force-reinstall "$PKG" >/dev/null 2>&1; }
+        [ -f "$PKG" ] && { echo -e "${GREEN}🔴 ${CYAN}Установка $PKG...${NC}"; opkg install --force-reinstall "$PKG" >/dev/null 2>&1; }
     done
 
     cd / && rm -rf "$WORKDIR"
