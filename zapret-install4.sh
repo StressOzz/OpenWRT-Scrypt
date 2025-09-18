@@ -1,6 +1,6 @@
 #!/bin/sh
 # ==========================================
-#  zapret-openwrt installer/updater (final)
+#  zapret-openwrt installer/updater (quiet)
 # ==========================================
 
 GREEN="\033[1;32m"
@@ -11,14 +11,12 @@ RESET="\033[0m"
 
 WORKDIR="/tmp/zapret-update"
 
-# 1. Определяем архитектуру (по максимальному приоритету)
+# 1. Определяем архитектуру
 ARCH=$(opkg print-architecture | sort -k3 -n | tail -n1 | awk '{print $2}')
-if [ -z "$ARCH" ]; then
-    ARCH=$(uname -m)
-fi
+[ -z "$ARCH" ] && ARCH=$(uname -m)
 echo -e "${CYAN}[INFO] Определена архитектура: $ARCH${RESET}"
 
-# 2. Определяем текущую версию (если установлено)
+# 2. Определяем текущую версию
 INSTALLED_VER=$(opkg list-installed | grep '^zapret ' | awk '{print $3}')
 if [ -n "$INSTALLED_VER" ]; then
     echo -e "${YELLOW}[INFO] Установлена версия zapret: $INSTALLED_VER${RESET}"
@@ -26,7 +24,7 @@ else
     echo -e "${YELLOW}[INFO] zapret пока не установлен${RESET}"
 fi
 
-# 3. Определяем последнюю версию в репозитории
+# 3. Определяем последнюю версию в GitHub
 LATEST_URL=$(curl -s https://api.github.com/repos/remittor/zapret-openwrt/releases/latest \
     | grep browser_download_url | grep "$ARCH.zip" | cut -d '"' -f 4)
 
@@ -47,7 +45,8 @@ fi
 # 4. Проверяем unzip
 if ! command -v unzip >/dev/null 2>&1; then
     echo -e "${YELLOW}[INFO] Устанавливаем unzip...${RESET}"
-    opkg update && opkg install unzip || {
+    opkg update >/dev/null 2>&1
+    opkg install unzip >/dev/null 2>&1 || {
         echo -e "${RED}[ERROR] Не удалось установить unzip${RESET}"
         exit 1
     }
@@ -73,7 +72,7 @@ unzip -o "$LATEST_FILE" >/dev/null || {
 for PKG in zapret_*.ipk luci-app-zapret_*.ipk; do
     if [ -f "$PKG" ]; then
         echo -e "${CYAN}[INFO] Установка $PKG...${RESET}"
-        opkg install --force-reinstall "$PKG" || {
+        opkg install --force-reinstall "$PKG" >/dev/null 2>&1 || {
             echo -e "${RED}[ERROR] Ошибка установки $PKG${RESET}"
         }
     fi
@@ -86,7 +85,7 @@ rm -rf "$WORKDIR"
 # 8. Перезапускаем zapret
 if /etc/init.d/zapret status >/dev/null 2>&1; then
     echo -e "${CYAN}[INFO] Перезапуск zapret...${RESET}"
-    /etc/init.d/zapret restart
+    /etc/init.d/zapret restart >/dev/null 2>&1
 fi
 
 echo -e "${GREEN}[DONE] Обновление zapret завершено${RESET}"
