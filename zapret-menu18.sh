@@ -8,7 +8,7 @@ RED="\033[1;31m"
 CYAN="\033[1;36m"
 YELLOW="\033[1;33m"
 MAGENTA="\033[1;35m"
-BOLD="\033[1m"
+BLUE="\033[0;34m"
 NC="\033[0m"
 
 WORKDIR="/tmp/zapret-update"
@@ -16,7 +16,7 @@ WORKDIR="/tmp/zapret-update"
 get_versions() {
     # Текущая версия
     INSTALLED_VER=$(opkg list-installed | grep '^zapret ' | awk '{print $3}')
-    [ -z "$INSTALLED_VER" ] && INSTALLED_VER="не установл"
+    [ -z "$INSTALLED_VER" ] && INSTALLED_VER="не найдена"
 
     # Последняя версия на GitHub
     ARCH=$(opkg print-architecture | sort -k3 -n | tail -n1 | awk '{print $2}')
@@ -83,7 +83,7 @@ install_update() {
     INSTALLED_VER=$(opkg list-installed | grep '^zapret ' | awk '{print $3}')
 
     if [ "$INSTALLED_VER" = "$LATEST_VER" ]; then
-        echo -e "${GREEN}[OK] Установлена самая свежая версия${NC}"
+        echo -e "${BLUE}🔴 ${GREEN}Установлена самая свежая версия${NC}"
         sleep 2
         show_menu
         return
@@ -104,7 +104,7 @@ install_update() {
     cd / && rm -rf "$WORKDIR"
     [ -f /etc/init.d/zapret ] && /etc/init.d/zapret restart >/dev/null 2>&1
 
-    echo -e "${GREEN}[DONE] Zapret установлен/обновлен${NC}"
+    echo -e "${BLUE}🔴 ${GREEN} Zapret установлен/обновлен${NC}"
     sleep 2
     show_menu
 }
@@ -132,7 +132,7 @@ uninstall_zapret() {
     EXTRA_FILES="/opt/zapret/config /opt/zapret/config.default /opt/zapret/ipset"
     for f in $EXTRA_FILES; do [ -e "$f" ] && rm -rf "$f"; done
 
-    echo -e "${GREEN}[DONE] Zapret полностью удален${NC}"
+    echo -e "${BLUE}🔴 ${GREEN}Zapret полностью удален${NC}"
     sleep 2
     show_menu
 }
