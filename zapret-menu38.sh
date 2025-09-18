@@ -22,45 +22,19 @@ get_versions() {
     LOCAL_ARCH=$(opkg print-architecture | sort -k3 -n | tail -n1 | awk '{print $2}')
     [ -z "$LOCAL_ARCH" ] && LOCAL_ARCH=$(uname -m)
 
-    # Последняя версия на GitHub (используем noarch.zip)
+    # Последняя версия на GitHub для вашей архитектуры
     LATEST_URL=$(curl -s https://api.github.com/repos/remittor/zapret-openwrt/releases/latest \
-        | grep browser_download_url | grep "noarch.zip" | cut -d '"' -f 4)
+        | grep browser_download_url | grep "${LOCAL_ARCH}.zip" | cut -d '"' -f 4)
 
-    if echo "$LATEST_URL" | grep -q '\.zip$'; then
+    if [ -n "$LATEST_URL" ] && echo "$LATEST_URL" | grep -q '\.zip$'; then
         LATEST_FILE=$(basename "$LATEST_URL")
         LATEST_VER=$(echo "$LATEST_FILE" | sed -E 's/.*zapret_v([0-9]+\.[0-9]+)_.*\.zip/\1/')
-        USED_ARCH="noarch (универсальный пакет)"
+        USED_ARCH="$LOCAL_ARCH"
     else
         LATEST_VER="не найдена"
-        USED_ARCH="не найден"
+        USED_ARCH="нет пакета для вашей архитектуры"
     fi
 }
-
-
-    # Последняя версия на GitHub
-    LATEST_URL=$(curl -s https://api.github.com/repos/remittor/zapret-openwrt/releases/latest \
-        | grep browser_download_url | grep "$ARCH.zip" | cut -d '"' -f 4)
-
-    # Проверка: действительно ли ссылка на zip
-    if echo "$LATEST_URL" | grep -q '\.zip$'; then
-        LATEST_FILE=$(basename "$LATEST_URL")
-        LATEST_VER=$(echo "$LATEST_FILE" | sed -E 's/.*zapret_v([0-9]+\.[0-9]+)_.*\.zip/\1/')
-    else
-        # fallback: если noarch не найден, попробуем найти любой zip
-        LATEST_URL=$(curl -s https://api.github.com/repos/remittor/zapret-openwrt/releases/latest \
-            | grep browser_download_url | grep "\.zip" | head -n1 | cut -d '"' -f 4)
-        if echo "$LATEST_URL" | grep -q '\.zip$'; then
-            LATEST_FILE=$(basename "$LATEST_URL")
-            LATEST_VER=$(echo "$LATEST_FILE" | sed -E 's/.*zapret_v([0-9]+\.[0-9]+)_.*\.zip/\1/')
-        else
-            LATEST_VER="не найдена"
-        fi
-    fi
-}
-
-
-
-
 
 show_menu() {
     get_versions
@@ -69,23 +43,15 @@ show_menu() {
     echo -e ""
     echo -e "${MAGENTA}ZAPRET on remittor Manager${GREEN}${NC}"
 
-    # Вывод версий с цветовой подсветкой
-    if [ "$INSTALLED_VER" = "$LATEST_VER" ]; then
-        INST_COLOR=$GREEN
-    else
-        INST_COLOR=$RED
-    fi
+    # Цвет для установленной версии
+    [ "$INSTALLED_VER" = "$LATEST_VER" ] && INST_COLOR=$GREEN || INST_COLOR=$RED
 
     echo -e ""
     echo -e "${YELLOW}Установленная версия: ${INST_COLOR}$INSTALLED_VER${NC}"
     echo -e "${YELLOW}Последняя версия GitHub: ${CYAN}$LATEST_VER${NC}"
     echo -e ""
-
-    echo -e "${YELLOW}Архитектура: ${CYAN}$ARCH${NC}"
-
     echo -e "${YELLOW}Локальная архитектура: ${GREEN}$LOCAL_ARCH${NC}"
     echo -e "${YELLOW}Используемый пакет: ${CYAN}$USED_ARCH${NC}"
-
     echo -e ""
     echo -e "${GREEN}1) Установить или обновить${NC}"
     echo -e "${GREEN}2) Удалить${NC}"
@@ -102,25 +68,23 @@ show_menu() {
 
 install_update() {
     clear
-
     echo -e ""
     echo -e "${MAGENTA}Начинаем установку ZAPRET${NC}"
     echo -e ""
 
-    ARCH=$(opkg print-architecture | sort -k3 -n | tail -n1 | awk '{print $2}')
-    [ -z "$ARCH" ] && ARCH=$(uname -m)
+    get_versions  # обновляем данные
 
-    LATEST_URL=$(curl -s https://api.github.com/repos/remittor/zapret-openwrt/releases/latest \
-        | grep browser_download_url | grep "$ARCH.zip" | cut -d '"' -f 4)
-    [ -z "$LATEST_URL" ] && { echo -e "${RED}[ERROR] Архив не найден${NC}"; sleep 2; show_menu; return; }
-
-    LATEST_FILE=$(basename "$LATEST_URL")
-    LATEST_VER=$(echo "$LATEST_FILE" | sed -E 's/.*zapret_v([0-9]+\.[0-9]+)_.*\.zip/\1/')
+    if [ "$USED_ARCH" = "нет пакета для вашей архитектуры" ]; then
+        echo -e "${RED}[ERROR] Для вашей архитектуры $LOCAL_ARCH релиз не найден${NC}"
+        echo -e "${YELLOW}Проверьте GitHub вручную: https://github.com/remittor/zapret-openwrt/releases${NC}"
+        sleep 4
+        show_menu
+        return
+    fi
 
     INSTALLED_VER=$(opkg list-installed | grep '^zapret ' | awk '{print $3}')
-
     if [ "$INSTALLED_VER" = "$LATEST_VER" ]; then
-        echo -e "${BLUE}🔴 ${GREEN}Установлена самая свежая версия${NC}"
+        echo -e "${BLUE}🔹 ${GREEN}Установлена самая свежая версия${NC}"
         sleep 2
         show_menu
         return
@@ -129,20 +93,20 @@ install_update() {
     command -v unzip >/dev/null 2>&1 || { opkg update >/dev/null 2>&1; opkg install unzip >/dev/null 2>&1; }
 
     mkdir -p "$WORKDIR" && cd "$WORKDIR" || return
-    echo -e "${GREEN}🔴 ${CYAN}Скачиваем $LATEST_FILE...${NC}"
+    echo -e "${GREEN}🔹 ${CYAN}Скачиваем $LATEST_FILE...${NC}"
     wget -q "$LATEST_URL" -O "$LATEST_FILE"
-    echo -e "${GREEN}🔴 ${CYAN}Распаковываем...${NC}"
+    echo -e "${GREEN}🔹 ${CYAN}Распаковываем...${NC}"
     unzip -o "$LATEST_FILE" >/dev/null
 
     for PKG in zapret_*.ipk luci-app-zapret_*.ipk; do
-        [ -f "$PKG" ] && { echo -e "${GREEN}🔴 ${CYAN}Установка $PKG...${NC}"; opkg install --force-reinstall "$PKG" >/dev/null 2>&1; }
+        [ -f "$PKG" ] && { echo -e "${GREEN}🔹 ${CYAN}Установка $PKG...${NC}"; opkg install --force-reinstall "$PKG" >/dev/null 2>&1; }
     done
 
     cd / && rm -rf "$WORKDIR"
     [ -f /etc/init.d/zapret ] && /etc/init.d/zapret restart >/dev/null 2>&1
 
     echo -e ""
-    echo -e "${BLUE}🔴 ${GREEN}Zapret установлен/обновлен${NC}"
+    echo -e "${BLUE}🔹 ${GREEN}Zapret установлен/обновлен${NC}"
     sleep 2
     show_menu
 }
@@ -170,7 +134,7 @@ uninstall_zapret() {
     EXTRA_FILES="/opt/zapret/config /opt/zapret/config.default /opt/zapret/ipset"
     for f in $EXTRA_FILES; do [ -e "$f" ] && rm -rf "$f"; done
 
-    echo -e "${BLUE}🔴 ${GREEN}Zapret полностью удален${NC}"
+    echo -e "${BLUE}🔹 ${GREEN}Zapret полностью удален${NC}"
     sleep 2
     show_menu
 }
