@@ -16,7 +16,7 @@ WORKDIR="/tmp/zapret-update"
 get_versions() {
     # Текущая версия
     INSTALLED_VER=$(opkg list-installed | grep '^zapret ' | awk '{print $3}')
-    [ -z "$INSTALLED_VER" ] && INSTALLED_VER="не найдена"
+    [ -z "$INSTALLED_VER" ] && INSTALLED_VER="не  найдена"
 
     # Последняя версия на GitHub
     ARCH=$(opkg print-architecture | sort -k3 -n | tail -n1 | awk '{print $2}')
@@ -104,7 +104,7 @@ install_update() {
     cd / && rm -rf "$WORKDIR"
     [ -f /etc/init.d/zapret ] && /etc/init.d/zapret restart >/dev/null 2>&1
 
-    echo -e "${BLUE}🔴 ${GREEN} Zapret установлен/обновлен${NC}"
+    echo -e "${BLUE}🔴 ${GREEN}Zapret установлен/обновлен${NC}"
     sleep 2
     show_menu
 }
