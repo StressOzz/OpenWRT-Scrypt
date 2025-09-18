@@ -40,7 +40,7 @@ show_menu() {
     echo -e "${GREEN}╠════════════════════════════════════════╣${NC}"
 
     # Вывод версий с цветовой подсветкой
-    if [ "$INSTALLED_VER" = "$LATEST_VER   " ]; then
+    if [ "$INSTALLED_VER" = "$LATEST_VER      " ]; then
         INST_COLOR=$GREEN
     else
         INST_COLOR=$RED
