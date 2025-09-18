@@ -1,6 +1,6 @@
 #!/bin/sh
 # ==========================================
-#  zapret-openwrt installer/updater (fixed)
+#  zapret-openwrt installer/updater (final)
 # ==========================================
 
 GREEN="\033[1;32m"
@@ -11,8 +11,8 @@ RESET="\033[0m"
 
 WORKDIR="/tmp/zapret-update"
 
-# 1. Определяем архитектуру (по приоритету)
-ARCH=$(opkg print-architecture | sort -k2 -n | tail -n1 | awk '{print $1}')
+# 1. Определяем архитектуру (по максимальному приоритету)
+ARCH=$(opkg print-architecture | sort -k3 -n | tail -n1 | awk '{print $2}')
 if [ -z "$ARCH" ]; then
     ARCH=$(uname -m)
 fi
@@ -82,5 +82,11 @@ done
 # 7. Чистим
 cd /
 rm -rf "$WORKDIR"
+
+# 8. Перезапускаем zapret
+if /etc/init.d/zapret status >/dev/null 2>&1; then
+    echo -e "${CYAN}[INFO] Перезапуск zapret...${RESET}"
+    /etc/init.d/zapret restart
+fi
 
 echo -e "${GREEN}[DONE] Обновление zapret завершено${RESET}"
