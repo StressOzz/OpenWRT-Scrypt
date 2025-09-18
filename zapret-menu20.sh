@@ -92,13 +92,13 @@ install_update() {
     command -v unzip >/dev/null 2>&1 || { opkg update >/dev/null 2>&1; opkg install unzip >/dev/null 2>&1; }
 
     mkdir -p "$WORKDIR" && cd "$WORKDIR" || return
-    echo -e "${CYAN}[INFO] Скачиваем $LATEST_FILE...${NC}"
+    echo -e "${CYAN}🔴 Скачиваем $LATEST_FILE...${NC}"
     wget -q "$LATEST_URL" -O "$LATEST_FILE"
-    echo -e "${CYAN}[INFO] Распаковываем...${NC}"
+    echo -e "${CYAN}🔴 Распаковываем...${NC}"
     unzip -o "$LATEST_FILE" >/dev/null
 
     for PKG in zapret_*.ipk luci-app-zapret_*.ipk; do
-        [ -f "$PKG" ] && { echo -e "${CYAN}[INFO] Установка $PKG...${NC}"; opkg install --force-reinstall "$PKG" >/dev/null 2>&1; }
+        [ -f "$PKG" ] && { echo -e "${CYAN}🔴 Установка $PKG...${NC}"; opkg install --force-reinstall "$PKG" >/dev/null 2>&1; }
     done
 
     cd / && rm -rf "$WORKDIR"
