@@ -115,29 +115,29 @@ install_update() {
     # Создаём рабочую директорию
     mkdir -p "$WORKDIR" && cd "$WORKDIR" || return
 
-    echo -e "${GREEN}🔴 ${CYAN}Скачиваем архив $LATEST_FILE...${NC}"
+    echo -e "${GREEN}🔴 ${CYAN}Скачиваем архив ${NC}$LATEST_FILE${NC}"
     wget -q "$LATEST_URL" -O "$LATEST_FILE"
 
-    echo -e "${GREEN}🔴 ${CYAN}Распаковываем архив...${NC}"
+    echo -e "${GREEN}🔴 ${CYAN}Распаковываем архив${NC}"
     unzip -o "$LATEST_FILE" >/dev/null
 
     # Устанавливаем все ipk пакеты (zapret и luci)
     for PKG in zapret_*.ipk luci-app-zapret_*.ipk; do
         [ -f "$PKG" ] && {
-            echo -e "${GREEN}🔴 ${CYAN}Устанавливаем пакет $PKG...${NC}"
+            echo -e "${GREEN}🔴 ${CYAN}Устанавливаем пакет ${NC}$PKG${NC}"
             opkg install --force-reinstall "$PKG" >/dev/null 2>&1
         }
     done
 
     # Удаляем временные файлы
-    echo -e "${GREEN}🔴 ${CYAN}Удаляем временные файлы и пакеты...${NC}"
+    echo -e "${GREEN}🔴 ${CYAN}Удаляем временные файлы и пакеты${NC}"
     cd /
     rm -rf "$WORKDIR"
     rm -f /tmp/*.ipk /tmp/*.zip /tmp/*zapret* 2>/dev/null
 
     # Перезапускаем сервис zapret
     [ -f /etc/init.d/zapret ] && {
-        echo -e "${GREEN}🔴 ${CYAN}Перезапуск службы zapret...${NC}"
+        echo -e "${GREEN}🔴 ${CYAN}Перезапуск службы zapret${NC}"
         /etc/init.d/zapret restart >/dev/null 2>&1
     }
 
@@ -159,38 +159,38 @@ uninstall_zapret() {
 
     # Остановка сервиса
     [ -f /etc/init.d/zapret ] && {
-        echo -e "${GREEN}🔴 ${CYAN}Останавливаем сервис zapret...${NC}"
+        echo -e "${GREEN}🔴 ${CYAN}Останавливаем сервис zapret${NC}"
         /etc/init.d/zapret stop >/dev/null 2>&1
     }
 
     # Убийство оставшихся процессов
-    echo -e "${GREEN}🔴 ${CYAN}Убиваем все процессы zapret...${NC}"
+    echo -e "${GREEN}🔴 ${CYAN}Убиваем все процессы zapret${NC}"
     for pid in $(ps | grep -i /opt/zapret | grep -v grep | awk '{print $1}'); do
         kill -9 $pid >/dev/null 2>&1
     done
 
     # Удаляем пакеты zapret
-    echo -e "${GREEN}🔴 ${CYAN}Удаляем пакеты zapret и luci-app-zapret...${NC}"
+    echo -e "${GREEN}🔴 ${CYAN}Удаляем пакеты zapret и luci-app-zapret${NC}"
     opkg remove --force-removal-of-dependent-packages zapret luci-app-zapret >/dev/null 2>&1
 
     # Удаляем конфиги и рабочие папки
-    echo -e "${GREEN}🔴 ${CYAN}Удаляем конфигурации и рабочие папки...${NC}"
+    echo -e "${GREEN}🔴 ${CYAN}Удаляем конфигурации и рабочие папки${NC}"
     for path in /opt/zapret /etc/config/zapret /etc/firewall.zapret; do [ -e "$path" ] && rm -rf "$path"; done
 
     # Очистка crontab
-    echo -e "${GREEN}🔴 ${CYAN}Очищаем crontab задания...${NC}"
+    echo -e "${GREEN}🔴 ${CYAN}Очищаем crontab задания${NC}"
     crontab -l | grep -v -i "zapret" | crontab - 2>/dev/null || true
 
     # Удаляем ipset
-    echo -e "${GREEN}🔴 ${CYAN}Удаляем ipset...${NC}"
+    echo -e "${GREEN}🔴 ${CYAN}Удаляем ipset${NC}"
     for set in $(ipset list -n 2>/dev/null | grep -i zapret); do ipset destroy "$set" >/dev/null 2>&1; done
 
     # Удаляем временные файлы
-    echo -e "${GREEN}🔴 ${CYAN}Удаляем временные файлы...${NC}"
+    echo -e "${GREEN}🔴 ${CYAN}Удаляем временные файлы${NC}"
     rm -f /tmp/*zapret* /var/run/*zapret* 2>/dev/null
 
     # Удаляем цепочки и таблицы nftables
-    echo -e "${GREEN}🔴 ${CYAN}Удаляем цепочки и таблицы nftables...${NC}"
+    echo -e "${GREEN}🔴 ${CYAN}Удаляем цепочки и таблицы nftables${NC}"
     for table in $(nft list tables 2>/dev/null | awk '{print $2}'); do
         chains=$(nft list table $table 2>/dev/null | grep -i 'chain .*zapret' | awk '{print $2}')
         for chain in $chains; do nft delete chain $table $chain >/dev/null 2>&1; done
@@ -199,23 +199,23 @@ uninstall_zapret() {
 
     # Удаляем init-скрипт
     [ -f /etc/init.d/zapret ] && {
-        echo -e "${GREEN}🔴 ${CYAN}Отключаем и удаляем init-скрипт...${NC}"
+        echo -e "${GREEN}🔴 ${CYAN}Отключаем и удаляем init-скрипт${NC}"
         /etc/init.d/zapret disable >/dev/null 2>&1
         rm -f /etc/init.d/zapret
     }
 
     # Удаляем hook скрипты
-    echo -e "${GREEN}🔴 ${CYAN}Удаляем hook скрипты...${NC}"
+    echo -e "${GREEN}🔴 ${CYAN}Удаляем hook скрипты${NC}"
     HOOK_DIR="/etc/hotplug.d/iface"
     [ -d "$HOOK_DIR" ] && for f in "$HOOK_DIR"/*zapret*; do [ -f "$f" ] && rm -f "$f"; done
 
     # Удаляем оставшиеся файлы конфигурации
-    echo -e "${GREEN}🔴 ${CYAN}Удаляем оставшиеся файлы конфигурации...${NC}"
+    echo -e "${GREEN}🔴 ${CYAN}Удаляем оставшиеся файлы конфигурации${NC}"
     EXTRA_FILES="/opt/zapret/config /opt/zapret/config.default /opt/zapret/ipset"
     for f in $EXTRA_FILES; do [ -e "$f" ] && rm -rf "$f"; done
 
     echo -e ""
-    echo -e "${BLUE}🔴 ${GREEN}Zapret полностью удалён и все временные файлы удалены${NC}"
+    echo -e "${BLUE}🔴 ${GREEN}Zapret полностью удалён !${NC}"
     echo -e ""
     read -p "Нажмите Enter для продолжения..." dummy
     show_menu
