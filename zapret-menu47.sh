@@ -62,6 +62,7 @@ install_update() {
     clear
     echo -e ""
     echo -e "${MAGENTA}Начинаем установку ZAPRET${NC}"
+    echo -e ""
     get_versions
 
     [ "$USED_ARCH" = "нет пакета для вашей архитектуры" ] && {
@@ -72,7 +73,9 @@ install_update() {
     }
 
     if [ "$INSTALLED_VER" = "$LATEST_VER" ]; then
+        echo -e ""
         echo -e "${BLUE}🔴 ${GREEN}Установлена самая свежая версия${NC}"
+        echo -e ""
         read -p "Нажмите Enter для продолжения..." dummy
         show_menu
         return
