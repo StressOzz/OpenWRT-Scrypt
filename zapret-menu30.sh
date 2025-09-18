@@ -14,21 +14,34 @@ NC="\033[0m"
 WORKDIR="/tmp/zapret-update"
 
 get_versions() {
-    INSTALLED_VER=$(opkg list-installed | grep '^zapret ' | awk '{print $3}')
-    [ -z "$INSTALLED_VER" ] && INSTALLED_VER="не установлена"
+    CACHE_FILE="/tmp/zapret_latest_version.txt"
+    CACHE_TTL=$((6*60*60)) # 6 часов в секундах
 
+    # Текущая версия
+    INSTALLED_VER=$(opkg list-installed | grep '^zapret ' | awk '{print $3}')
+    [ -z "$INSTALLED_VER" ] && INSTALLED_VER="не найдена"
+
+    # Архитектура
     ARCH=$(opkg print-architecture | sort -k3 -n | tail -n1 | awk '{print $2}')
     [ -z "$ARCH" ] && ARCH=$(uname -m)
 
-    LATEST_URL=$(curl -s https://api.github.com/repos/remittor/zapret-openwrt/releases/latest \
-        | grep browser_download_url | grep "$ARCH.zip" | cut -d '"' -f 4)
-    if [ -n "$LATEST_URL" ]; then
-        LATEST_FILE=$(basename "$LATEST_URL")
-        LATEST_VER=$(echo "$LATEST_FILE" | sed -E 's/.*zapret_v([0-9]+\.[0-9]+)_.*\.zip/\1/')
+    # Проверяем кэш
+    if [ -f "$CACHE_FILE" ] && [ $(( $(date +%s) - $(stat -c %Y $CACHE_FILE) )) -lt $CACHE_TTL ]; then
+        LATEST_VER=$(cat "$CACHE_FILE")
     else
-        LATEST_VER="не найдена"
+        # Получаем последнюю версию с GitHub
+        LATEST_URL=$(curl -s https://api.github.com/repos/remittor/zapret-openwrt/releases/latest \
+            | grep browser_download_url | grep "$ARCH.zip" | cut -d '"' -f 4)
+        if [ -n "$LATEST_URL" ]; then
+            LATEST_FILE=$(basename "$LATEST_URL")
+            LATEST_VER=$(echo "$LATEST_FILE" | sed -E 's/.*zapret_v([0-9]+\.[0-9]+)_.*\.zip/\1/')
+            echo "$LATEST_VER" > "$CACHE_FILE"
+        else
+            LATEST_VER="не найдена"
+        fi
     fi
 }
+
 
 
 show_menu() {
