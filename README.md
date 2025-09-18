@@ -4,26 +4,19 @@
 
 ---
 
-## Быстрый запуск
-
-Выполните команду в терминале роутера.
-
-Выбирите, что Вам нужно:
-1) Включить IPv6
-2) Выключить IPv6
-0) Отмена        
-
+# Скрипт для отключения или включения IPv6 на OpenWRT
+   
 ```
 sh <(wget -O - https://raw.githubusercontent.com/StressOzz/OpenWRT-Scrypt/main/IPv6-On-Off.sh)
 ```
 
 ---
-# Удаление Zapret
+# Установка, обновление и удаление Zapret от remittor 
 
 ```
-sh <(wget -O - https://raw.githubusercontent.com/StressOzz/OpenWRT-Scrypt/main/Zapret-Uninstall.sh)
+sh <(wget -O - https://raw.githubusercontent.com/StressOzz/OpenWRT-Scrypt/main/Zapret-Manager.sh)
 ```
-
+---
 ### Примечание
 
 Для надёжности рекомендуется перезагрузить роутер:
