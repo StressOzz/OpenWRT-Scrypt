@@ -4,7 +4,7 @@
 
 ---
 
-# Скрипт для отключения или включения IPv6 на OpenWRT
+# Скрипт для отключения или включения IPv6
    
 ```
 sh <(wget -O - https://raw.githubusercontent.com/StressOzz/OpenWRT-Scrypt/main/IPv6-On-Off.sh)
