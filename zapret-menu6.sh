@@ -34,8 +34,9 @@ get_versions() {
 show_menu() {
     get_versions
     clear
-    echo -e "${GREEN}${BOLD}╔════════════════════════════════════════╗${NC}"
-    echo -e "${GREEN}║ ${MAGENTA}           ZAPRET Manager           ${GREEN}║${NC}"
+
+    echo -e "${GREEN}╔════════════════════════════════════════╗${NC}"
+    echo -e "${GREEN}║       ${MAGENTA}ZAPRET on remittor Manager       ${GREEN}║${NC}"
     echo -e "${GREEN}╠════════════════════════════════════════╣${NC}"
 
     # Вывод версий с цветовой подсветкой
@@ -45,13 +46,13 @@ show_menu() {
         INST_COLOR=$RED
     fi
 
-    echo -e "${YELLOW}║ Установленная версия: ${INST_COLOR}$INSTALLED_VER${YELLOW}       ║${NC}"
-    echo -e "${YELLOW}║ Последняя версия GitHub: ${CYAN}$LATEST_VER${YELLOW}       ║${NC}"
+    echo -e "${GREEN}║ ${YELLOW}Установленная версия: ${INST_COLOR}$INSTALLED_VER$      ${GREEN}║${NC}"
+    echo -e "${GREEN}║ ${YELLOW}Последняя версия GitHub: ${CYAN}$LATEST_VER$     ${GREEN}║${NC}"
 
     echo -e "${GREEN}╠════════════════════════════════════════╣${NC}"
-    echo -e "║ 1) Установить или обновить           ║"
-    echo -e "║ 2) Удалить (суперчисто)              ║"
-    echo -e "║ 3) Выход (Enter)                      ║"
+    echo -e "${GREEN}║ 1) Установить или обновить             ║${NC}"
+    echo -e "${GREEN}║ 2) Удалить (суперчисто)                ║${NC}"
+    echo -e "${GREEN}║ 3) Выход (Enter)                       ║${NC}"
     echo -e "${GREEN}╚════════════════════════════════════════╝${NC}"
     echo -n "Выберите пункт: "
     read choice
@@ -105,8 +106,8 @@ install_update() {
 
 uninstall_zapret() {
     clear
-    echo -e "${GREEN}${BOLD}╔════════════════════════════════════════╗${NC}"
-    echo -e "${MAGENTA}║   Начинаем суперчистое удаление ZAPRET  ║${NC}"
+    echo -e "${GREEN}╔════════════════════════════════════════╗${NC}"
+    echo -e "${GREEN}║  ${MAGENTA}Начинаем суперчистое удаление ZAPRET  ${GREEN}║${NC}"
     echo -e "${GREEN}╚════════════════════════════════════════╝${NC}"
 
     opkg remove --force-removal-of-dependent-packages zapret luci-app-zapret >/dev/null 2>&1
