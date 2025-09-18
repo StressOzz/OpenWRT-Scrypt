@@ -1,6 +1,6 @@
 #!/bin/sh
 # ==========================================
-# Zapret Manager (installer/updater + superclean uninstall) for OpenWRT
+# Zapret on remittor Manager (installer/updater + superclean uninstall) for OpenWRT
 # ==========================================
 
 GREEN="\033[1;32m"
@@ -35,9 +35,7 @@ show_menu() {
     get_versions
     clear
 
-    echo -e "${GREEN}╔════════════════════════════════════════╗${NC}"
-    echo -e "${GREEN}║       ${MAGENTA}ZAPRET on remittor Manager       ${GREEN}║${NC}"
-    echo -e "${GREEN}╠════════════════════════════════════════╣${NC}"
+    echo -e "${GREEN}       ${MAGENTA}ZAPRET on remittor Manager${GREEN}${NC}"
 
     # Вывод версий с цветовой подсветкой
     if [ "$INSTALLED_VER" = "$LATEST_VER" ]; then
@@ -46,15 +44,15 @@ show_menu() {
         INST_COLOR=$RED
     fi
 
-    echo -e "${GREEN}║ ${YELLOW}Установленная версия: ${INST_COLOR}$INSTALLED_VER      ${GREEN}║${NC}"
-    echo -e "${GREEN}║ ${YELLOW}Последняя версия GitHub: ${CYAN}$LATEST_VER   ${GREEN}║${NC}"
-    echo -e "${GREEN}║ ${CYAN}Архитектура: $ARCH                       ${GREEN}║${NC}"
+    echo -e "${YELLOW}Установленная версия: ${INST_COLOR}$INSTALLED_VER${NC}"
+    echo -e "${YELLOW}Последняя версия GitHub: ${CYAN}$LATEST_VER${NC}"
+    echo -e "${CYAN}Архитектура: $ARCH${NC}"
 
-    echo -e "${GREEN}╠════════════════════════════════════════╣${NC}"
-    echo -e "${GREEN}║ 1) Установить или обновить             ║${NC}"
-    echo -e "${GREEN}║ 2) Удалить                             ║${NC}"
-    echo -e "${GREEN}║ 3) Выход (Enter)                       ║${NC}"
-    echo -e "${GREEN}╚════════════════════════════════════════╝${NC}"
+    echo -e ""
+    echo -e "${GREEN}1) Установить или обновить${NC}"
+    echo -e "${GREEN}2) Удалить${NC}"
+    echo -e "${GREEN}3) Выход (Enter)${NC}"
+    echo -e ""
     echo -n "Выберите пункт: "
     read choice
     case "$choice" in
@@ -67,9 +65,9 @@ show_menu() {
 install_update() {
     clear
 
-    echo -e "${GREEN}╔═══════════════════════════════════════╗${NC}"
-    echo -e "${GREEN}║       ${MAGENTA}Начинаем установку ZAPRET       ${GREEN}║${NC}"
-    echo -e "${GREEN}╚═══════════════════════════════════════╝${NC}"
+    echo -e ""
+    echo -e "${MAGENTA}Начинаем установку ZAPRET${NC}"
+    echo -e ""
 
     ARCH=$(opkg print-architecture | sort -k3 -n | tail -n1 | awk '{print $2}')
     [ -z "$ARCH" ] && ARCH=$(uname -m)
@@ -112,9 +110,9 @@ install_update() {
 
 uninstall_zapret() {
     clear
-    echo -e "${GREEN}╔════════════════════════════════════════╗${NC}"
-    echo -e "${GREEN}║        ${MAGENTA}Начинаем удаление ZAPRET        ${GREEN}║${NC}"
-    echo -e "${GREEN}╚════════════════════════════════════════╝${NC}"
+    echo -e ""
+    echo -e "${MAGENTA}Начинаем удаление ZAPRET${NC}"
+    echo -e ""
 
     opkg remove --force-removal-of-dependent-packages zapret luci-app-zapret >/dev/null 2>&1
     for pid in $(ps | grep -i /opt/zapret | grep -v grep | awk '{print $1}'); do kill -9 $pid >/dev/null 2>&1; done
