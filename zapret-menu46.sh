@@ -66,14 +66,14 @@ install_update() {
 
     [ "$USED_ARCH" = "нет пакета для вашей архитектуры" ] && {
         echo -e "${RED}[ERROR] Нет доступного пакета для вашей архитектуры: $LOCAL_ARCH${NC}"
-        sleep 2
+        read -p "Нажмите Enter для продолжения..." dummy
         show_menu
         return
     }
 
     if [ "$INSTALLED_VER" = "$LATEST_VER" ]; then
         echo -e "${BLUE}🔴 ${GREEN}Установлена самая свежая версия${NC}"
-        sleep 2
+        read -p "Нажмите Enter для продолжения..." dummy
         show_menu
         return
     fi
@@ -111,7 +111,7 @@ install_update() {
     echo -e ""
     echo -e "${BLUE}🔴 ${GREEN}Zapret установлен/обновлен и все временные файлы удалены${NC}"
     echo -e ""
-    read -n1 -r -p "Нажмите любую клавишу для продолжения..."
+    read -p "Нажмите Enter для продолжения..." dummy
     show_menu
 }
 
@@ -119,6 +119,7 @@ uninstall_zapret() {
     clear
     echo -e ""
     echo -e "${MAGENTA}Начинаем удаление ZAPRET${NC}"
+    echo -e ""
 
     echo -e "${GREEN}🔴 ${CYAN}Удаляем пакеты zapret и luci-app-zapret...${NC}"
     opkg remove --force-removal-of-dependent-packages zapret luci-app-zapret >/dev/null 2>&1
@@ -162,7 +163,7 @@ uninstall_zapret() {
     echo -e ""
     echo -e "${BLUE}🔴 ${GREEN}Zapret полностью удалён и все временные файлы удалены${NC}"
     echo -e ""
-    read -n1 -r -p "Нажмите любую клавишу для продолжения..."
+    read -p "Нажмите Enter для продолжения..." dummy
     show_menu
 }
 
