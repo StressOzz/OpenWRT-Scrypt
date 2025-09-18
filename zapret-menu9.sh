@@ -46,8 +46,8 @@ show_menu() {
         INST_COLOR=$RED
     fi
 
-    echo -e "${GREEN}║ ${YELLOW}Установленная версия: ${INST_COLOR}$INSTALLED_VER  ${GREEN}║${NC}"
-    echo -e "${GREEN}║ ${YELLOW}Последняя версия GitHub: ${CYAN}$LATEST_VER  ${GREEN}║${NC}"
+    echo -e "${GREEN}║ ${YELLOW}Установленная версия: ${INST_COLOR}$INSTALLED_VER   ${GREEN}║${NC}"
+    echo -e "${GREEN}║ ${YELLOW}Последняя версия GitHub: ${CYAN}$LATEST_VER   ${GREEN}║${NC}"
 
     echo -e "${GREEN}╠════════════════════════════════════════╣${NC}"
     echo -e "${GREEN}║ 1) Установить или обновить             ║${NC}"
