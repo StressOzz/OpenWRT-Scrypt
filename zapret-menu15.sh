@@ -40,13 +40,13 @@ show_menu() {
     echo -e "${GREEN}╠════════════════════════════════════════╣${NC}"
 
     # Вывод версий с цветовой подсветкой
-    if [ "$INSTALLED_VER" = "$LATEST_VER      " ]; then
+    if [ "$INSTALLED_VER" = "$LATEST_VER" ]; then
         INST_COLOR=$GREEN
     else
         INST_COLOR=$RED
     fi
 
-    echo -e "${GREEN}║ ${YELLOW}Установленная версия: ${INST_COLOR}$INSTALLED_VER   ${GREEN}║${NC}"
+    echo -e "${GREEN}║ ${YELLOW}Установленная версия: ${INST_COLOR}$INSTALLED_VER      ${GREEN}║${NC}"
     echo -e "${GREEN}║ ${YELLOW}Последняя версия GitHub: ${CYAN}$LATEST_VER   ${GREEN}║${NC}"
 
     echo -e "${GREEN}╠════════════════════════════════════════╣${NC}"
