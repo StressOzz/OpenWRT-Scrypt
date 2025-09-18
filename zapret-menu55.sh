@@ -90,6 +90,7 @@ install_update() {
     # Если пакет для архитектуры отсутствует
     [ "$USED_ARCH" = "нет пакета для вашей архитектуры" ] && {
         echo -e "${RED}[ERROR] Нет доступного пакета для вашей архитектуры: $LOCAL_ARCH${NC}"
+        echo -e ""
         read -p "Нажмите Enter для продолжения..." dummy
         show_menu
         return
@@ -106,7 +107,7 @@ install_update() {
 
     # Устанавливаем unzip, если не установлен
     command -v unzip >/dev/null 2>&1 || { 
-        echo -e "${GREEN}🔴 ${CYAN}Устанавливаем unzip для распаковки${NC}"
+        echo -e "${GREEN}🔴 ${CYAN}Устанавливаем${NC} unzip ${CYAN}для распаковки${NC}"
         opkg update >/dev/null 2>&1
         opkg install unzip >/dev/null 2>&1
     }
@@ -114,7 +115,7 @@ install_update() {
     # Создаём рабочую директорию
     mkdir -p "$WORKDIR" && cd "$WORKDIR" || return
 
-    echo -e "${GREEN}🔴 ${CYAN}Скачиваем архив ${NC}$LATEST_FILE${NC}"
+    echo -e "${GREEN}🔴 ${CYAN}Скачиваем архив ${NC}$LATEST_FILE"
     wget -q "$LATEST_URL" -O "$LATEST_FILE"
 
     echo -e "${GREEN}🔴 ${CYAN}Распаковываем архив${NC}"
@@ -158,12 +159,12 @@ uninstall_zapret() {
 
     # Остановка сервиса
     [ -f /etc/init.d/zapret ] && {
-        echo -e "${GREEN}🔴 ${CYAN}Останавливаем сервис zapret${NC}"
+        echo -e "${GREEN}🔴 ${CYAN}Останавливаем сервис ${NC}zapret"
         /etc/init.d/zapret stop >/dev/null 2>&1
     }
 
     # Убийство оставшихся процессов
-    echo -e "${GREEN}🔴 ${CYAN}Убиваем все процессы zapret${NC}"
+    echo -e "${GREEN}🔴 ${CYAN}Убиваем все процессы ${NC}zapret"
     for pid in $(ps | grep -i /opt/zapret | grep -v grep | awk '{print $1}'); do
         kill -9 $pid >/dev/null 2>&1
     done
