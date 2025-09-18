@@ -106,8 +106,10 @@ install_update() {
 
 uninstall_zapret() {
     clear
+${MAGENTA}
+
     echo -e "${GREEN}╔════════════════════════════════════════╗${NC}"
-    echo -e "${GREEN}║  ${MAGENTA}Начинаем суперчистое удаление ZAPRET  ${GREEN}║${NC}"
+    echo -e "${GREEN}║        ${MAGENTA}Начинаем удаление ZAPRET        ${GREEN}║${NC}"
     echo -e "${GREEN}╚════════════════════════════════════════╝${NC}"
 
     opkg remove --force-removal-of-dependent-packages zapret luci-app-zapret >/dev/null 2>&1
