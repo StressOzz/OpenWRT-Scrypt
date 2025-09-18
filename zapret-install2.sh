@@ -1,6 +1,6 @@
 #!/bin/sh
 # ==========================================
-#  zapret-openwrt installer/updater
+#  zapret-openwrt installer/updater (fixed)
 # ==========================================
 
 GREEN="\033[1;32m"
@@ -10,10 +10,9 @@ YELLOW="\033[1;33m"
 RESET="\033[0m"
 
 WORKDIR="/tmp/zapret-update"
-REPO="https://github.com/remittor/zapret-openwrt/releases/latest/download"
 
-# 1. Определяем архитектуру
-ARCH=$(opkg print-architecture | awk 'NR>1 {print $2}' | head -n1)
+# 1. Определяем архитектуру (по приоритету)
+ARCH=$(opkg print-architecture | sort -k2 -n | tail -n1 | awk '{print $1}')
 if [ -z "$ARCH" ]; then
     ARCH=$(uname -m)
 fi
