@@ -22,6 +22,11 @@ get_versions() {
     ARCH=$(opkg print-architecture | sort -k3 -n | tail -n1 | awk '{print $2}')
     [ -z "$ARCH" ] && ARCH=$(uname -m)
 
+    # Если noarch, оставляем как есть
+    if [ "$ARCH" = "noarch" ]; then
+        ARCH="noarch"
+    fi
+
     # Последняя версия на GitHub
     LATEST_URL=$(curl -s https://api.github.com/repos/remittor/zapret-openwrt/releases/latest \
         | grep browser_download_url | grep "$ARCH.zip" | cut -d '"' -f 4)
@@ -31,9 +36,18 @@ get_versions() {
         LATEST_FILE=$(basename "$LATEST_URL")
         LATEST_VER=$(echo "$LATEST_FILE" | sed -E 's/.*zapret_v([0-9]+\.[0-9]+)_.*\.zip/\1/')
     else
-        LATEST_VER="не найдена"
+        # fallback: если noarch не найден, попробуем найти любой zip
+        LATEST_URL=$(curl -s https://api.github.com/repos/remittor/zapret-openwrt/releases/latest \
+            | grep browser_download_url | grep "\.zip" | head -n1 | cut -d '"' -f 4)
+        if echo "$LATEST_URL" | grep -q '\.zip$'; then
+            LATEST_FILE=$(basename "$LATEST_URL")
+            LATEST_VER=$(echo "$LATEST_FILE" | sed -E 's/.*zapret_v([0-9]+\.[0-9]+)_.*\.zip/\1/')
+        else
+            LATEST_VER="не найдена"
+        fi
     fi
 }
+
 
 
 
