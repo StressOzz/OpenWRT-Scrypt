@@ -16,7 +16,7 @@ WORKDIR="/tmp/zapret-update"
 get_versions() {
     # Текущая версия
     INSTALLED_VER=$(opkg list-installed | grep '^zapret ' | awk '{print $3}')
-    [ -z "$INSTALLED_VER" ] && INSTALLED_VER="не установлена"
+    [ -z "$INSTALLED_VER" ] && INSTALLED_VER="не установл"
 
     # Последняя версия на GitHub
     ARCH=$(opkg print-architecture | sort -k3 -n | tail -n1 | awk '{print $2}')
@@ -65,6 +65,11 @@ show_menu() {
 
 install_update() {
     clear
+
+    echo -e "${GREEN}╔═══════════════════════════════════════╗${NC}"
+    echo -e "${GREEN}║       ${MAGENTA}Начинаем установку ZAPRET       ${GREEN}║${NC}"
+    echo -e "${GREEN}╚═══════════════════════════════════════╝${NC}"
+
     ARCH=$(opkg print-architecture | sort -k3 -n | tail -n1 | awk '{print $2}')
     [ -z "$ARCH" ] && ARCH=$(uname -m)
 
