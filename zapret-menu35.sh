@@ -18,14 +18,24 @@ get_versions() {
     INSTALLED_VER=$(opkg list-installed | grep '^zapret ' | awk '{print $3}')
     [ -z "$INSTALLED_VER" ] && INSTALLED_VER="не найдена"
 
-    # Архитектура
-    ARCH=$(opkg print-architecture | sort -k3 -n | tail -n1 | awk '{print $2}')
-    [ -z "$ARCH" ] && ARCH=$(uname -m)
+    # Локальная архитектура роутера
+    LOCAL_ARCH=$(opkg print-architecture | sort -k3 -n | tail -n1 | awk '{print $2}')
+    [ -z "$LOCAL_ARCH" ] && LOCAL_ARCH=$(uname -m)
 
-    # Если noarch, оставляем как есть
-    if [ "$ARCH" = "noarch" ]; then
-        ARCH="noarch"
+    # Последняя версия на GitHub (используем noarch.zip)
+    LATEST_URL=$(curl -s https://api.github.com/repos/remittor/zapret-openwrt/releases/latest \
+        | grep browser_download_url | grep "noarch.zip" | cut -d '"' -f 4)
+
+    if echo "$LATEST_URL" | grep -q '\.zip$'; then
+        LATEST_FILE=$(basename "$LATEST_URL")
+        LATEST_VER=$(echo "$LATEST_FILE" | sed -E 's/.*zapret_v([0-9]+\.[0-9]+)_.*\.zip/\1/')
+        USED_ARCH="noarch (универсальный пакет)"
+    else
+        LATEST_VER="не найдена"
+        USED_ARCH="не найден"
     fi
+}
+
 
     # Последняя версия на GitHub
     LATEST_URL=$(curl -s https://api.github.com/repos/remittor/zapret-openwrt/releases/latest \
@@ -70,7 +80,11 @@ show_menu() {
     echo -e "${YELLOW}Установленная версия: ${INST_COLOR}$INSTALLED_VER${NC}"
     echo -e "${YELLOW}Последняя версия GitHub: ${CYAN}$LATEST_VER${NC}"
     echo -e ""
+
     echo -e "${YELLOW}Архитектура: ${CYAN}$ARCH${NC}"
+
+    echo -e "${YELLOW}Локальная архитектура: ${GREEN}$LOCAL_ARCH${NC}"
+    echo -e "${YELLOW}Используемый пакет: ${CYAN}$USED_ARCH${NC}"
 
     echo -e ""
     echo -e "${GREEN}1) Установить или обновить${NC}"
