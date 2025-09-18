@@ -42,6 +42,7 @@ show_menu() {
     get_versions
     clear
 
+    echo -e ""
     echo -e "${MAGENTA}ZAPRET on remittor Manager${GREEN}${NC}"
 
     # Вывод версий с цветовой подсветкой
@@ -55,7 +56,7 @@ show_menu() {
     echo -e "${YELLOW}Установленная версия: ${INST_COLOR}$INSTALLED_VER${NC}"
     echo -e "${YELLOW}Последняя версия GitHub: ${CYAN}$LATEST_VER${NC}"
     echo -e ""
-    echo -e "${YELLOW}Архитектура: ${GREEN}$ARCH${NC}"
+    echo -e "${YELLOW}Архитектура: ${CYAN}$ARCH${NC}"
 
     echo -e ""
     echo -e "${GREEN}1) Установить или обновить${NC}"
@@ -112,6 +113,7 @@ install_update() {
     cd / && rm -rf "$WORKDIR"
     [ -f /etc/init.d/zapret ] && /etc/init.d/zapret restart >/dev/null 2>&1
 
+    echo -e ""
     echo -e "${BLUE}🔴 ${GREEN}Zapret установлен/обновлен${NC}"
     sleep 2
     show_menu
