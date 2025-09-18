@@ -60,6 +60,7 @@ show_menu() {
 
 install_update() {
     clear
+    echo -e ""
     echo -e "${MAGENTA}Начинаем установку ZAPRET${NC}"
     get_versions
 
@@ -107,14 +108,16 @@ install_update() {
         echo -e "${GREEN}🔴 ${CYAN}Перезапуск службы zapret...${NC}"
         /etc/init.d/zapret restart >/dev/null 2>&1
     }
-
+    echo -e ""
     echo -e "${BLUE}🔴 ${GREEN}Zapret установлен/обновлен и все временные файлы удалены${NC}"
-    sleep 2
+    echo -e ""
+    read -n1 -r -p "Нажмите любую клавишу для продолжения..."
     show_menu
 }
 
 uninstall_zapret() {
     clear
+    echo -e ""
     echo -e "${MAGENTA}Начинаем удаление ZAPRET${NC}"
 
     echo -e "${GREEN}🔴 ${CYAN}Удаляем пакеты zapret и luci-app-zapret...${NC}"
@@ -156,8 +159,10 @@ uninstall_zapret() {
     EXTRA_FILES="/opt/zapret/config /opt/zapret/config.default /opt/zapret/ipset"
     for f in $EXTRA_FILES; do [ -e "$f" ] && rm -rf "$f"; done
 
-    echo -e "${BLUE}🔴 ${GREEN}Zapret полностью удален и все временные файлы удалены${NC}"
-    sleep 2
+    echo -e ""
+    echo -e "${BLUE}🔴 ${GREEN}Zapret полностью удалён и все временные файлы удалены${NC}"
+    echo -e ""
+    read -n1 -r -p "Нажмите любую клавишу для продолжения..."
     show_menu
 }
 
