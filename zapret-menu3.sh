@@ -1,6 +1,6 @@
 #!/bin/sh
 # ==========================================
-# Zapret Manager (installer/updater + superclean uninstall) for OpenWRT
+#   Zapret Manager v2 (installer/updater + superclean uninstall)
 # ==========================================
 
 GREEN="\033[1;32m"
@@ -14,13 +14,12 @@ NC="\033[0m"
 WORKDIR="/tmp/zapret-update"
 
 get_versions() {
-    # Текущая версия
     INSTALLED_VER=$(opkg list-installed | grep '^zapret ' | awk '{print $3}')
     [ -z "$INSTALLED_VER" ] && INSTALLED_VER="не установлена"
 
-    # Последняя версия на GitHub
     ARCH=$(opkg print-architecture | sort -k3 -n | tail -n1 | awk '{print $2}')
     [ -z "$ARCH" ] && ARCH=$(uname -m)
+
     LATEST_URL=$(curl -s https://api.github.com/repos/remittor/zapret-openwrt/releases/latest \
         | grep browser_download_url | grep "$ARCH.zip" | cut -d '"' -f 4)
     if [ -n "$LATEST_URL" ]; then
@@ -31,28 +30,35 @@ get_versions() {
     fi
 }
 
+center_text() {
+    # $1 = текст, $2 = общая ширина
+    local text="$1"
+    local width="$2"
+    local pad=$(( (width - ${#text}) / 2 ))
+    printf "%*s%s%*s" $pad "" "$text" $pad ""
+}
+
 show_menu() {
     get_versions
     clear
+    WIDTH=42
     echo -e "${GREEN}${BOLD}╔════════════════════════════════════════╗${NC}"
-    echo -e "${GREEN}║ ${MAGENTA}           ZAPRET Manager           ${GREEN}║${NC}"
+    echo -e "${GREEN}║${NC}$(center_text "${MAGENTA}ZAPRET MANAGER${GREEN}" $WIDTH)║${NC}"
     echo -e "${GREEN}╠════════════════════════════════════════╣${NC}"
 
-    # Вывод версий с цветовой подсветкой
-    if [ "$INSTALLED_VER" = "$LATEST_VER" ]; then
-        INST_COLOR=$GREEN
-    else
-        INST_COLOR=$RED
-    fi
+    # Версии
+    INST_COLOR=$RED
+    [ "$INSTALLED_VER" = "$LATEST_VER" ] && INST_COLOR=$GREEN
 
-    echo -e "${YELLOW}║ Установленная версия: ${INST_COLOR}$INSTALLED_VER${YELLOW}       ║${NC}"
-    echo -e "${YELLOW}║ Последняя версия GitHub: ${CYAN}$LATEST_VER${YELLOW}       ║${NC}"
+    echo -e "${YELLOW}║ $(center_text "Установленная версия: ${INST_COLOR}$INSTALLED_VER${YELLOW}" $WIDTH) ║${NC}"
+    echo -e "${YELLOW}║ $(center_text "Последняя версия GitHub: ${CYAN}$LATEST_VER${YELLOW}" $WIDTH) ║${NC}"
 
     echo -e "${GREEN}╠════════════════════════════════════════╣${NC}"
-    echo -e "║ 1) Установить или обновить           ║"
-    echo -e "║ 2) Удалить (суперчисто)              ║"
-    echo -e "║ 3) Выход (Enter)                      ║"
+    echo -e "║ $(center_text "1) Установить / Обновить" $WIDTH) ║"
+    echo -e "║ $(center_text "2) Удалить (суперчисто)" $WIDTH) ║"
+    echo -e "║ $(center_text "3) Выход (Enter)" $WIDTH) ║"
     echo -e "${GREEN}╚════════════════════════════════════════╝${NC}"
+
     echo -n "Выберите пункт: "
     read choice
     case "$choice" in
@@ -64,17 +70,8 @@ show_menu() {
 
 install_update() {
     clear
-    ARCH=$(opkg print-architecture | sort -k3 -n | tail -n1 | awk '{print $2}')
-    [ -z "$ARCH" ] && ARCH=$(uname -m)
-
-    LATEST_URL=$(curl -s https://api.github.com/repos/remittor/zapret-openwrt/releases/latest \
-        | grep browser_download_url | grep "$ARCH.zip" | cut -d '"' -f 4)
-    [ -z "$LATEST_URL" ] && { echo -e "${RED}[ERROR] Архив не найден${NC}"; sleep 2; show_menu; return; }
-
-    LATEST_FILE=$(basename "$LATEST_URL")
-    LATEST_VER=$(echo "$LATEST_FILE" | sed -E 's/.*zapret_v([0-9]+\.[0-9]+)_.*\.zip/\1/')
-
-    INSTALLED_VER=$(opkg list-installed | grep '^zapret ' | awk '{print $3}')
+    get_versions
+    echo -e "${CYAN}[INFO] Архитектура: $ARCH${NC}"
 
     if [ "$INSTALLED_VER" = "$LATEST_VER" ]; then
         echo -e "${GREEN}[OK] Установлена самая свежая версия${NC}"
@@ -106,7 +103,7 @@ install_update() {
 uninstall_zapret() {
     clear
     echo -e "${GREEN}${BOLD}╔════════════════════════════════════════╗${NC}"
-    echo -e "${MAGENTA}║   Начинаем суперчистое удаление ZAPRET  ║${NC}"
+    echo -e "${MAGENTA}║$(center_text "Начинаем суперчистое удаление ZAPRET" 42)║${NC}"
     echo -e "${GREEN}╚════════════════════════════════════════╝${NC}"
 
     opkg remove --force-removal-of-dependent-packages zapret luci-app-zapret >/dev/null 2>&1
