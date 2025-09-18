@@ -14,23 +14,17 @@ NC="\033[0m"
 WORKDIR="/tmp/zapret-update"
 
 get_versions() {
-    # Текущая версия
     INSTALLED_VER=$(opkg list-installed | grep '^zapret ' | awk '{print $3}')
-    [ -z "$INSTALLED_VER" ] && INSTALLED_VER="не найдена"
+    [ -z "$INSTALLED_VER" ] && INSTALLED_VER="не установлена"
 
-    # Определяем архитектуру
     ARCH=$(opkg print-architecture | sort -k3 -n | tail -n1 | awk '{print $2}')
     [ -z "$ARCH" ] && ARCH=$(uname -m)
 
-    # Последняя версия на GitHub (берем первый ZIP, игнорируем ARCH)
     LATEST_URL=$(curl -s https://api.github.com/repos/remittor/zapret-openwrt/releases/latest \
-        | grep -i 'browser_download_url' | grep -i '.zip' | head -n1 | cut -d '"' -f 4)
-
+        | grep browser_download_url | grep "$ARCH.zip" | cut -d '"' -f 4)
     if [ -n "$LATEST_URL" ]; then
         LATEST_FILE=$(basename "$LATEST_URL")
-        # Ищем версию вида zapret_vX.X_
-        LATEST_VER=$(echo "$LATEST_FILE" | grep -o -E 'zapret_v[0-9]+\.[0-9]+' | sed 's/zapret_v//')
-        [ -z "$LATEST_VER" ] && LATEST_VER="не найдена"
+        LATEST_VER=$(echo "$LATEST_FILE" | sed -E 's/.*zapret_v([0-9]+\.[0-9]+)_.*\.zip/\1/')
     else
         LATEST_VER="не найдена"
     fi
