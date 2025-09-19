@@ -71,7 +71,7 @@ show_menu() {
     [ "$INSTALLED_VER" = "$LATEST_VER" ] && INST_COLOR=$GREEN || INST_COLOR=$RED
 
     echo -e ""
-    echo -e "${YELLOW}Установленная версия      : ${INST_COLOR}$INSTALLED_VER${NC}"
+    echo -e "${YELLOW}Установленная версия: ${INST_COLOR}$INSTALLED_VER${NC}"
     echo -e "${YELLOW}Последняя версия на GitHub: ${CYAN}$LATEST_VER${NC}"
     echo -e ""
     echo -e "${YELLOW}Архитектура устройства: ${NC}$LOCAL_ARCH"
@@ -132,6 +132,18 @@ install_update() {
 
     echo -e "${GREEN}🔴 ${CYAN}Распаковываем архив${NC}"
     unzip -o "$LATEST_FILE" >/dev/null
+
+    # Остановка службы перед обновлением
+    [ -f /etc/init.d/zapret ] && {
+    echo -e "${GREEN}🔴 ${CYAN}Останавливаем сервис ${NC}zapret"
+    /etc/init.d/zapret stop >/dev/null 2>&1
+    }
+
+    # Убиваем оставшиеся процессы zapret
+    echo -e "${GREEN}🔴 ${CYAN}Убиваем все процессы ${NC}zapret"
+    for pid in $(ps | grep -i /opt/zapret | grep -v grep | awk '{print $1}'); do
+    kill -9 $pid >/dev/null 2>&1
+    done
 
     # Устанавливаем все ipk пакеты (zapret и luci)
     for PKG in zapret_*.ipk luci-app-zapret_*.ipk; do
