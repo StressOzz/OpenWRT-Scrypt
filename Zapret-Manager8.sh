@@ -31,6 +31,10 @@ get_versions() {
 
     # Проверяем curl и ставим, если нет
     command -v curl >/dev/null 2>&1 || {
+        clear
+        echo -e ""
+        echo -e "${MAGENTA}ZAPRET on remittor Manager${NC}"
+        echo -e ""
         echo -e "${GREEN}🔴 ${NC}curl ${CYAN}не найден, устанавливаем...${NC}"
         opkg update >/dev/null 2>&1
         opkg install curl >/dev/null 2>&1
@@ -61,7 +65,7 @@ show_menu() {
     get_versions
     clear
     echo -e ""
-    echo -e "${MAGENTA}ZAPRET on remittor Manager${GREEN}${NC}"
+    echo -e "${MAGENTA}ZAPRET on remittor Manager${NC}"
 
     # Цвет установленной версии (зелёный = актуальна, красный = не актуальна)
     [ "$INSTALLED_VER" = "$LATEST_VER" ] && INST_COLOR=$GREEN || INST_COLOR=$RED
@@ -132,7 +136,7 @@ install_update() {
     # Устанавливаем все ipk пакеты (zapret и luci)
     for PKG in zapret_*.ipk luci-app-zapret_*.ipk; do
         [ -f "$PKG" ] && {
-            echo -e "${GREEN}🔴 ${CYAN}Устанавливаем пакет ${NC}$PKG${NC}"
+            echo -e "${GREEN}🔴 ${CYAN}Устанавливаем пакет ${NC}$PKG"
             opkg install --force-reinstall "$PKG" >/dev/null 2>&1
         }
     done
