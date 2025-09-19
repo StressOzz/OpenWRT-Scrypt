@@ -71,8 +71,8 @@ show_menu() {
     [ "$INSTALLED_VER" = "$LATEST_VER" ] && INST_COLOR=$GREEN || INST_COLOR=$RED
 
     echo -e ""
-    echo -e "${YELLOW}Установленная версия: ${INST_COLOR}$INSTALLED_VER${NC}"
-    echo -e "${YELLOW}Последняя версия GitHub: ${CYAN}$LATEST_VER${NC}"
+    echo -e "${YELLOW}Установленная версия      : ${INST_COLOR}$INSTALLED_VER${NC}"
+    echo -e "${YELLOW}Последняя версия на GitHub: ${CYAN}$LATEST_VER${NC}"
     echo -e ""
     echo -e "${YELLOW}Архитектура устройства: ${NC}$LOCAL_ARCH"
     echo -e ""
