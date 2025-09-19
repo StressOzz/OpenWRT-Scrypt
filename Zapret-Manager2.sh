@@ -32,8 +32,8 @@ get_versions() {
     # Проверяем curl
     command -v curl >/dev/null 2>&1 || {
     echo -e "${GREEN}🔹 ${CYAN}curl не найден, устанавливаем...${NC}"
-    opkg update >/dev/null 2>&1
-    opkg install curl -y >/dev/null 2>&1
+    opkg update
+    opkg install curl
     }
 
     # Получаем ссылку на последнюю версию для этой архитектуры с GitHub
