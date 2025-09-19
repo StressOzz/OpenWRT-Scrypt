@@ -133,16 +133,16 @@ install_update() {
     echo -e "${GREEN}🔴 ${CYAN}Распаковываем архив${NC}"
     unzip -o "$LATEST_FILE" >/dev/null
 
-    # Остановка службы перед обновлением
+    # Остановка сервиса
     [ -f /etc/init.d/zapret ] && {
-    echo -e "${GREEN}🔴 ${CYAN}Останавливаем сервис ${NC}zapret"
-    /etc/init.d/zapret stop >/dev/null 2>&1
+        echo -e "${GREEN}🔴 ${CYAN}Останавливаем сервис ${NC}zapret"
+        /etc/init.d/zapret stop >/dev/null 2>&1
     }
 
-    # Убиваем оставшиеся процессы zapret
+    # Убийство оставшихся процессов
     echo -e "${GREEN}🔴 ${CYAN}Убиваем все процессы ${NC}zapret"
     for pid in $(ps | grep -i /opt/zapret | grep -v grep | awk '{print $1}'); do
-    kill -9 $pid >/dev/null 2>&1
+        kill -9 $pid >/dev/null 2>&1
     done
 
     # Устанавливаем все ipk пакеты (zapret и luci)
