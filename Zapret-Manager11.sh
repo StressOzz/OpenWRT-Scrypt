@@ -35,7 +35,7 @@ get_versions() {
         echo -e ""
         echo -e "${MAGENTA}ZAPRET on remittor Manager${NC}"
         echo -e ""
-        echo -e "${GREEN}🔴 ${NC}curl ${CYAN}не найден, устанавливаем...${NC}"
+        echo -e "${GREEN}🔴 ${CYAN}Устанавливаем${NC} curl ${CYAN}для загрузки информации с ${NC}GitHub"
         opkg update >/dev/null 2>&1
         opkg install curl >/dev/null 2>&1
     }
@@ -125,7 +125,7 @@ install_update() {
 
     # Устанавливаем unzip, если не установлен
     command -v unzip >/dev/null 2>&1 || { 
-        echo -e "${GREEN}🔴 ${CYAN}Устанавливаем${NC} unzip ${CYAN}для распаковки${NC}"
+        echo -e "${GREEN}🔴 ${CYAN}Устанавливаем${NC} unzip ${CYAN}для распаковки архива${NC}"
         opkg update >/dev/null 2>&1
         opkg install unzip >/dev/null 2>&1
     }
