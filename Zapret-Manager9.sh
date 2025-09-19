@@ -74,7 +74,7 @@ show_menu() {
     echo -e "${YELLOW}Установленная версия: ${INST_COLOR}$INSTALLED_VER${NC}"
     echo -e "${YELLOW}Последняя версия GitHub: ${CYAN}$LATEST_VER${NC}"
     echo -e ""
-    echo -e "${YELLOW}Архитектура устройства: ${GREEN}$LOCAL_ARCH${NC}"
+    echo -e "${YELLOW}Архитектура устройства: ${NC}$LOCAL_ARCH"
     echo -e ""
     echo -e "${GREEN}1) Установить или обновить${NC}"
     echo -e "${GREEN}2) Удалить${NC}"
