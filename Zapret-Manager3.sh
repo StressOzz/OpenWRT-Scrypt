@@ -29,16 +29,9 @@ get_versions() {
     # Если не удалось, берём из opkg, исключая noarch
     [ -z "$LOCAL_ARCH" ] && LOCAL_ARCH=$(opkg print-architecture | grep -v "noarch" | sort -k3 -n | tail -n1 | awk '{print $2}')
     
-    # Проверяем curl
-    command -v curl >/dev/null 2>&1 || {
-    echo -e "${GREEN}🔹 ${CYAN}curl не найден, устанавливаем...${NC}"
-    opkg update
-    opkg install curl
-    }
-
-    # Получаем ссылку на последнюю версию для этой архитектуры с GitHub
-    LATEST_URL=$(curl -s https://api.github.com/repos/remittor/zapret-openwrt/releases/latest \
+    LATEST_URL=$(wget -qO- https://api.github.com/repos/remittor/zapret-openwrt/releases/latest \
         | grep browser_download_url | grep "$LOCAL_ARCH.zip" | cut -d '"' -f 4)
+
 
     # Проверяем, есть ли такой пакет
     if [ -n "$LATEST_URL" ] && echo "$LATEST_URL" | grep -q '\.zip$'; then
@@ -177,7 +170,7 @@ uninstall_zapret() {
     done
 
     # Удаляем пакеты zapret
-    echo -e "${GREEN}🔴 ${CYAN}Удаляем пакеты${NC} zapret ${CYAN}и ${NC}luci-app-zapret${NC}"
+    echo -e "${GREEN}🔴 ${CYAN}Удаляем пакеты${NC} zapret ${CYAN}и ${NC}luci-app-zapret"
     opkg remove --force-removal-of-dependent-packages zapret luci-app-zapret >/dev/null 2>&1
 
     # Удаляем конфиги и рабочие папки
