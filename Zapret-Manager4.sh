@@ -29,8 +29,10 @@ get_versions() {
     # Если не удалось, берём из opkg, исключая noarch
     [ -z "$LOCAL_ARCH" ] && LOCAL_ARCH=$(opkg print-architecture | grep -v "noarch" | sort -k3 -n | tail -n1 | awk '{print $2}')
     
-    LATEST_URL=$(wget -qO- https://api.github.com/repos/remittor/zapret-openwrt/releases/latest \
-        | grep browser_download_url | grep "$LOCAL_ARCH.zip" | cut -d '"' -f 4)
+    LATEST_URL=$(wget -qO- --header="Accept: application/vnd.github+json" \
+    https://api.github.com/repos/remittor/zapret-openwrt/releases/latest \
+    | grep browser_download_url | grep "$LOCAL_ARCH.zip" | cut -d '"' -f 4)
+
 
 
     # Проверяем, есть ли такой пакет
