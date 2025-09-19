@@ -28,6 +28,13 @@ get_versions() {
     LOCAL_ARCH=$(awk -F\' '/DISTRIB_ARCH/ {print $2}' /etc/openwrt_release)
     # Если не удалось, берём из opkg, исключая noarch
     [ -z "$LOCAL_ARCH" ] && LOCAL_ARCH=$(opkg print-architecture | grep -v "noarch" | sort -k3 -n | tail -n1 | awk '{print $2}')
+    
+    # Проверяем curl
+    command -v curl >/dev/null 2>&1 || {
+    echo -e "${GREEN}🔹 ${CYAN}curl не найден, устанавливаем...${NC}"
+    opkg update >/dev/null 2>&1
+    opkg install curl -y >/dev/null 2>&1
+    }
 
     # Получаем ссылку на последнюю версию для этой архитектуры с GitHub
     LATEST_URL=$(curl -s https://api.github.com/repos/remittor/zapret-openwrt/releases/latest \
