@@ -113,18 +113,18 @@ install_update() {
         return
     fi
 
+    # Создаём рабочую директорию
+    mkdir -p "$WORKDIR" && cd "$WORKDIR" || return
+
+    echo -e "${GREEN}🔴 ${CYAN}Скачиваем архив ${NC}$LATEST_FILE"
+    wget -q "$LATEST_URL" -O "$LATEST_FILE"
+
     # Устанавливаем unzip, если не установлен
     command -v unzip >/dev/null 2>&1 || { 
         echo -e "${GREEN}🔴 ${CYAN}Устанавливаем${NC} unzip ${CYAN}для распаковки${NC}"
         opkg update >/dev/null 2>&1
         opkg install unzip >/dev/null 2>&1
     }
-
-    # Создаём рабочую директорию
-    mkdir -p "$WORKDIR" && cd "$WORKDIR" || return
-
-    echo -e "${GREEN}🔴 ${CYAN}Скачиваем архив ${NC}$LATEST_FILE"
-    wget -q "$LATEST_URL" -O "$LATEST_FILE"
 
     echo -e "${GREEN}🔴 ${CYAN}Распаковываем архив${NC}"
     unzip -o "$LATEST_FILE" >/dev/null
