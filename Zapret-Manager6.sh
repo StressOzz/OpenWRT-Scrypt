@@ -29,18 +29,15 @@ get_versions() {
     LOCAL_ARCH=$(awk -F\' '/DISTRIB_ARCH/ {print $2}' /etc/openwrt_release)
     [ -z "$LOCAL_ARCH" ] && LOCAL_ARCH=$(opkg print-architecture | grep -v "noarch" | sort -k3 -n | tail -n1 | awk '{print $2}')
 
-    # ======= Проверяем wget =======
-    command -v wget >/dev/null 2>&1 || {
-        echo -e "\033[1;31m[ERROR] wget не найден, установка невозможна\033[0m"
-        LATEST_VER="не найдена"
-        USED_ARCH="нет wget"
-        return
+    # Проверяем curl и ставим, если нет
+    command -v curl >/dev/null 2>&1 || {
+        echo -e "${GREEN}🔴 ${NC}curl ${CYAN}не найден, устанавливаем...${NC}"
+        opkg update >/dev/null 2>&1
+        opkg install curl >/dev/null 2>&1
     }
-    # ======= конец проверки =======
 
-    # Получаем ссылку на последнюю версию для точной архитектуры
-    LATEST_URL=$(wget -qO- --header="Accept: application/vnd.github+json" \
-        https://api.github.com/repos/remittor/zapret-openwrt/releases/latest \
+    # Получаем ссылку на последнюю версию для этой архитектуры с GitHub
+    LATEST_URL=$(curl -s https://api.github.com/repos/remittor/zapret-openwrt/releases/latest \
         | grep browser_download_url | grep "$LOCAL_ARCH.zip" | cut -d '"' -f 4)
 
     # Проверяем, есть ли такой пакет
