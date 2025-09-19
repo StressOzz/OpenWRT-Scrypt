@@ -190,8 +190,10 @@ uninstall_zapret() {
     for path in /opt/zapret /etc/config/zapret /etc/firewall.zapret; do [ -e "$path" ] && rm -rf "$path"; done
 
     # Очистка crontab
+    if crontab -l >/dev/null 2>&1; then
+    crontab -l | grep -v -i "zapret" | crontab -
     echo -e "${GREEN}🔴 ${CYAN}Очищаем${NC} crontab ${CYAN}задания${NC}"
-    crontab -l | grep -v -i "zapret" | crontab - 2>/dev/null || true
+    fi
 
     # Удаляем ipset
     echo -e "${GREEN}🔴 ${CYAN}Удаляем${NC} ipset"
