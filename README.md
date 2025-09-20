@@ -11,7 +11,7 @@ sh <(wget -O - https://raw.githubusercontent.com/StressOzz/OpenWRT-Scrypt/main/I
 ```
 
 ---
-# Установка, обновление и удаление Zapret от remittor 
+# (test) Установка, обновление и удаление Zapret от remittor 
 
 ```
 sh <(wget -O - https://raw.githubusercontent.com/StressOzz/OpenWRT-Scrypt/main/Zapret-Manager.sh)
