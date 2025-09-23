@@ -18,7 +18,8 @@ NC="\033[0m"
 
 echo -e "${CYAN}[*] Скачиваем ${CURL_FILE} ...${NC}"
 mkdir -p /tmp/curl-dl && cd /tmp/curl-dl || exit 1
-wget -q --show-progress "$URL" || { echo -e "${RED}[!] Ошибка загрузки${NC}"; exit 1; }
+# BusyBox wget не умеет show-progress, поэтому используем тихий режим -q
+wget -q "$URL" -O "$CURL_FILE" || { echo -e "${RED}[!] Ошибка загрузки${NC}"; exit 1; }
 
 echo -e "${CYAN}[*] Распаковываем в ${INSTALL_DIR} ...${NC}"
 mkdir -p "$INSTALL_DIR"
