@@ -51,16 +51,22 @@ echo -e "${CYAN}[*] Скачиваем Zapret v71.4 ...${NC}"
 rm -rf /tmp/zapret /tmp/zapret.zip
 wget -O /tmp/zapret.zip "$ZAPRET_URL" || { echo -e "${RED}[!] Ошибка скачивания Zapret${NC}"; exit 1; }
 
-# --- Распаковываем Zapret ---
-echo -e "${CYAN}[*] Распаковываем Zapret ...${NC}"
-unzip -o /tmp/zapret.zip -d /tmp/ || { echo -e "${RED}[!] Ошибка распаковки Zapret${NC}"; exit 1; }
+# --- Распаковываем Zapret в /tmp/zapret с перезаписью ---
+echo -e "${CYAN}[*] Распаковываем Zapret в /tmp/zapret ...${NC}"
+rm -rf /tmp/zapret
+mkdir -p /tmp/zapret
+unzip -o /tmp/zapret.zip -d /tmp/zapret-temp || { echo -e "${RED}[!] Ошибка распаковки Zapret${NC}"; exit 1; }
+# Переносим содержимое внутрь /tmp/zapret, перезаписывая файлы
+shopt -s dotglob 2>/dev/null || true
+mv /tmp/zapret-temp/* /tmp/zapret/
+rm -rf /tmp/zapret-temp
 
 # --- Устанавливаем Zapret ---
 echo -e "${CYAN}[*] Устанавливаем Zapret ...${NC}"
 sh /tmp/zapret/install_easy.sh || { echo -e "${RED}[!] Ошибка установки Zapret${NC}"; exit 1; }
 
 # --- Очистка временных файлов ---
-rm -rf /tmp/zapret /tmp/zapret.zip
+rm -rf /tmp/zapret.zip
 rm -f /tmp/curl.tar /tmp/curl.tar.xz
 
 # --- Запуск blockcheck.sh ---
