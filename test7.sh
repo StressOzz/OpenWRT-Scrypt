@@ -1,0 +1,55 @@
+#!/bin/sh
+# ==========================================
+# Автоматическая установка curl (musl aarch64)
+# на OpenWRT и запуск zapret/blockcheck.sh
+# ==========================================
+
+INSTALL_DIR="/opt/curl"
+ZAPRET_DIR="/opt/zapret"
+CURL_URL="https://github.com/stunnel/static-curl/releases/download/8.16.0/curl-linux-aarch64-musl-8.16.0.tar.xz"
+
+GREEN="\033[1;32m"
+RED="\033[1;31m"
+CYAN="\033[1;36m"
+NC="\033[0m"
+
+echo -e "${CYAN}[*] Проверяем необходимые пакеты...${NC}"
+opkg update
+opkg install wget tar xz ca-certificates || true
+
+mkdir -p "$INSTALL_DIR"
+
+echo -e "${CYAN}[*] Скачиваем curl ...${NC}"
+wget -O /tmp/curl.tar.xz "$CURL_URL" || { echo -e "${RED}[!] Ошибка скачивания${NC}"; exit 1; }
+
+echo -e "${CYAN}[*] Распаковываем .xz ...${NC}"
+unxz -k /tmp/curl.tar.xz || { echo -e "${RED}[!] Ошибка распаковки .xz${NC}"; exit 1; }
+
+echo -e "${CYAN}[*] Распаковываем .tar в $INSTALL_DIR ...${NC}"
+tar -xvf /tmp/curl.tar -C "$INSTALL_DIR" || { echo -e "${RED}[!] Ошибка распаковки .tar${NC}"; exit 1; }
+
+chmod +x "$INSTALL_DIR/curl"
+
+echo -e "${CYAN}[*] Добавляем curl в PATH ...${NC}"
+PROFILE_LINE="export PATH=\$PATH:${INSTALL_DIR}"
+if [ -d /etc/profile.d ]; then
+    echo "$PROFILE_LINE" > /etc/profile.d/curl_path.sh 2>/dev/null || true
+else
+    if ! grep -qxF "$PROFILE_LINE" /etc/profile 2>/dev/null; then
+        printf "%s\n" "$PROFILE_LINE" >> /etc/profile 2>/dev/null || true
+    fi
+fi
+export PATH=$PATH:"${INSTALL_DIR}"
+
+echo -e "${GREEN}[+] curl установлен:${NC}"
+"$INSTALL_DIR/curl" --version | head -n1
+
+# --- Запуск blockcheck.sh ---
+if [ -x "${ZAPRET_DIR}/blockcheck.sh" ]; then
+    echo -e "${CYAN}[*] Запускаем blockcheck.sh ...${NC}"
+    cd "${ZAPRET_DIR}" || exit 1
+    ./blockcheck.sh
+else
+    echo -e "${RED}[!] blockcheck.sh не найден в ${ZAPRET_DIR}${NC}"
+    echo "Скопируй zapret в эту папку или поправь переменную ZAPRET_DIR."
+fi
