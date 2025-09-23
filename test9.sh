@@ -14,9 +14,9 @@ CYAN="\033[1;36m"
 NC="\033[0m"
 
 # --- Проверка и установка зависимостей ---
-echo -e "${CYAN}[*] Проверяем необходимые пакеты...${NC}"
-opkg update
-opkg install wget tar xz ca-certificates || true
+# echo -e "${CYAN}[*] Проверяем необходимые пакеты...${NC}"
+# opkg update
+# opkg install wget tar xz ca-certificates || true
 
 mkdir -p "$INSTALL_DIR"
 
