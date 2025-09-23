@@ -1,36 +1,23 @@
 #!/bin/sh
 # ==========================================
-# Установка curl (musl) для OpenWRT
-# и запуск zapret/blockcheck.sh
+# Установка curl (musl, aarch64) на OpenWRT
+# без архива, с запуском blockcheck.sh
 # ==========================================
 
 INSTALL_DIR="/opt/curl"
 ZAPRET_DIR="/opt/zapret"
+CURL_BIN_URL="https://github.com/stunnel/static-curl/releases/download/8.16.0/curl-linux-aarch64-musl-8.16.0"  # сам бинарник
 
-# URL на готовый musl бинарь в tar.gz (заменим на подходящий архив)
-CURL_URL="https://github.com/stunnel/static-curl/releases/download/8.16.0/curl-linux-aarch64-musl-8.16.0.tar.gz"
-CURL_FILE="/tmp/curl-musl.tar.gz"
-
-# Цвета
 GREEN="\033[1;32m"
 RED="\033[1;31m"
 CYAN="\033[1;36m"
 NC="\033[0m"
 
-# Проверяем wget и tar
-command -v wget >/dev/null 2>&1 || { echo -e "${RED}[!] Не найден wget${NC}"; exit 1; }
-command -v tar >/dev/null 2>&1 || { echo -e "${RED}[!] Не найден tar${NC}"; exit 1; }
+mkdir -p "$INSTALL_DIR"
 
 echo -e "${CYAN}[*] Скачиваем curl ...${NC}"
-wget -q "$CURL_URL" -O "$CURL_FILE" || { echo -e "${RED}[!] Ошибка скачивания${NC}"; exit 1; }
+wget -q "$CURL_BIN_URL" -O "$INSTALL_DIR/curl" || { echo -e "${RED}[!] Ошибка скачивания${NC}"; exit 1; }
 
-echo -e "${CYAN}[*] Распаковываем ...${NC}"
-mkdir -p "$INSTALL_DIR" /tmp/curl-extract
-tar -xvzf "$CURL_FILE" -C /tmp/curl-extract || { echo -e "${RED}[!] Ошибка распаковки${NC}"; exit 1; }
-
-# переносим содержимое в INSTALL_DIR
-TOPDIR=$(ls /tmp/curl-extract | head -n1)
-mv /tmp/curl-extract/"$TOPDIR"/* "$INSTALL_DIR"/
 chmod +x "$INSTALL_DIR/curl"
 
 # добавляем в PATH
