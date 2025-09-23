@@ -13,23 +13,31 @@ RED="\033[1;31m"
 CYAN="\033[1;36m"
 NC="\033[0m"
 
+# --- Проверка и установка зависимостей ---
 echo -e "${CYAN}[*] Проверяем необходимые пакеты...${NC}"
 opkg update
 opkg install wget tar xz ca-certificates || true
 
 mkdir -p "$INSTALL_DIR"
 
+# --- Скачивание curl ---
 echo -e "${CYAN}[*] Скачиваем curl ...${NC}"
+rm -f /tmp/curl.tar.xz /tmp/curl.tar
 wget -O /tmp/curl.tar.xz "$CURL_URL" || { echo -e "${RED}[!] Ошибка скачивания${NC}"; exit 1; }
 
+# --- Распаковка .xz ---
 echo -e "${CYAN}[*] Распаковываем .xz ...${NC}"
-unxz -k /tmp/curl.tar.xz || { echo -e "${RED}[!] Ошибка распаковки .xz${NC}"; exit 1; }
+rm -f /tmp/curl.tar
+unxz -k -f /tmp/curl.tar.xz || { echo -e "${RED}[!] Ошибка распаковки .xz${NC}"; exit 1; }
 
+# --- Распаковка .tar ---
 echo -e "${CYAN}[*] Распаковываем .tar в $INSTALL_DIR ...${NC}"
-tar -xvf /tmp/curl.tar -C "$INSTALL_DIR" || { echo -e "${RED}[!] Ошибка распаковки .tar${NC}"; exit 1; }
+rm -rf "$INSTALL_DIR"/*
+tar -xf /tmp/curl.tar -C "$INSTALL_DIR" || { echo -e "${RED}[!] Ошибка распаковки .tar${NC}"; exit 1; }
 
 chmod +x "$INSTALL_DIR/curl"
 
+# --- Добавляем curl в PATH ---
 echo -e "${CYAN}[*] Добавляем curl в PATH ...${NC}"
 PROFILE_LINE="export PATH=\$PATH:${INSTALL_DIR}"
 if [ -d /etc/profile.d ]; then
