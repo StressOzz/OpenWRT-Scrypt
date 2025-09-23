@@ -1,29 +1,25 @@
 #!/bin/sh
 # ==========================================
 # Автоматическая установка curl (musl aarch64)
-# на OpenWRT и запуск zapret/blockcheck.sh
+# и Zapret v71.4 на OpenWRT + запуск blockcheck.sh
 # ==========================================
 
 INSTALL_DIR="/opt/curl"
 ZAPRET_DIR="/opt/zapret"
 CURL_URL="https://github.com/stunnel/static-curl/releases/download/8.16.0/curl-linux-aarch64-musl-8.16.0.tar.xz"
+ZAPRET_URL="https://github.com/bol-van/zapret/releases/download/v71.4/zapret-v71.4.zip"
 
 GREEN="\033[1;32m"
 RED="\033[1;31m"
 CYAN="\033[1;36m"
 NC="\033[0m"
 
-# --- Проверка и установка зависимостей ---
-# echo -e "${CYAN}[*] Проверяем необходимые пакеты...${NC}"
-# opkg update
-# opkg install wget tar xz ca-certificates || true
-
 mkdir -p "$INSTALL_DIR"
 
 # --- Скачивание curl ---
 echo -e "${CYAN}[*] Скачиваем curl ...${NC}"
 rm -f /tmp/curl.tar.xz /tmp/curl.tar
-wget -O /tmp/curl.tar.xz "$CURL_URL" || { echo -e "${RED}[!] Ошибка скачивания${NC}"; exit 1; }
+wget -O /tmp/curl.tar.xz "$CURL_URL" || { echo -e "${RED}[!] Ошибка скачивания curl${NC}"; exit 1; }
 
 # --- Распаковка .xz ---
 echo -e "${CYAN}[*] Распаковываем .xz ...${NC}"
@@ -34,7 +30,6 @@ unxz -k -f /tmp/curl.tar.xz || { echo -e "${RED}[!] Ошибка распако�
 echo -e "${CYAN}[*] Распаковываем .tar в $INSTALL_DIR ...${NC}"
 rm -rf "$INSTALL_DIR"/*
 tar -xf /tmp/curl.tar -C "$INSTALL_DIR" || { echo -e "${RED}[!] Ошибка распаковки .tar${NC}"; exit 1; }
-
 chmod +x "$INSTALL_DIR/curl"
 
 # --- Добавляем curl в PATH ---
@@ -48,9 +43,25 @@ else
     fi
 fi
 export PATH=$PATH:"${INSTALL_DIR}"
-
 echo -e "${GREEN}[+] curl установлен:${NC}"
 "$INSTALL_DIR/curl" --version | head -n1
+
+# --- Скачиваем Zapret ---
+echo -e "${CYAN}[*] Скачиваем Zapret v71.4 ...${NC}"
+rm -rf /tmp/zapret /tmp/zapret.zip
+wget -O /tmp/zapret.zip "$ZAPRET_URL" || { echo -e "${RED}[!] Ошибка скачивания Zapret${NC}"; exit 1; }
+
+# --- Распаковываем Zapret ---
+echo -e "${CYAN}[*] Распаковываем Zapret ...${NC}"
+unzip -o /tmp/zapret.zip -d /tmp/ || { echo -e "${RED}[!] Ошибка распаковки Zapret${NC}"; exit 1; }
+
+# --- Устанавливаем Zapret ---
+echo -e "${CYAN}[*] Устанавливаем Zapret ...${NC}"
+sh /tmp/zapret/install_easy.sh || { echo -e "${RED}[!] Ошибка установки Zapret${NC}"; exit 1; }
+
+# --- Очистка временных файлов ---
+rm -rf /tmp/zapret /tmp/zapret.zip
+rm -f /tmp/curl.tar /tmp/curl.tar.xz
 
 # --- Запуск blockcheck.sh ---
 if [ -x "${ZAPRET_DIR}/blockcheck.sh" ]; then
@@ -59,5 +70,4 @@ if [ -x "${ZAPRET_DIR}/blockcheck.sh" ]; then
     ./blockcheck.sh
 else
     echo -e "${RED}[!] blockcheck.sh не найден в ${ZAPRET_DIR}${NC}"
-    echo "Скопируй zapret в эту папку или поправь переменную ZAPRET_DIR."
 fi
