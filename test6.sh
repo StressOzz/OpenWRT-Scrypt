@@ -1,0 +1,33 @@
+GREEN="\033[1;32m"
+RED="\033[1;31m"
+CYAN="\033[1;36m"
+YELLOW="\033[1;33m"
+MAGENTA="\033[1;35m"
+BLUE="\033[0;34m"
+NC="\033[0m"
+
+clear
+echo ""
+echo " ███████╗ █████╗ ██████╗ ██████╗ ███████╗████████╗";
+echo " ╚══███╔╝██╔══██╗██╔══██╗██╔══██╗██╔════╝╚══██╔══╝";
+echo "   ███╔╝ ███████║██████╔╝██████╔╝█████╗     ██║   ";
+echo "  ███╔╝  ██╔══██║██╔═══╝ ██╔══██╗██╔══╝     ██║   ";
+echo " ███████╗██║  ██║██║     ██║  ██║███████╗   ██║   ";
+echo " ╚══════╝╚═╝  ╚═╝╚═╝     ╚═╝  ╚═╝╚══════╝   ╚═╝   ";
+echo ""
+echo "https://github.com/bol-van/zapret";
+echo "https://github.com/remittor/zapret-openwrt";
+
+echo -e ""
+echo -e "${MAGENTA}ZAPRET on remittor Manager${NC}"
+echo -e ""
+echo -e "${YELLOW}Установленная версия: ${INST_COLOR}$INSTALLED_VER${NC}"
+echo -e "${YELLOW}Последняя версия на GitHub: ${CYAN}$LATEST_VER${NC}"
+echo -e ""
+echo -e "${YELLOW}Архитектура устройства: ${NC}$LOCAL_ARCH"
+echo -e ""
+echo -e "${GREEN}1) Установить или обновить${NC}"
+echo -e "${GREEN}2) Удалить${NC}"
+echo -e "${GREEN}3) Выход (Enter)${NC}"
+echo -e ""
+echo -n "Выберите пункт: "
