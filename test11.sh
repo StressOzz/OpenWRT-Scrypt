@@ -5,6 +5,7 @@ YELLOW="\033[1;33m"
 MAGENTA="\033[1;35m"
 BLUE="\033[0;34m"
 NC="\033[0m"
+GRAY='\033[38;5;236m'
 
 clear
 echo ""
@@ -15,8 +16,8 @@ echo "  ███╔╝  ██╔══██║██╔═══╝ ██╔
 echo " ███████╗██║  ██║██║     ██║  ██║███████╗   ██║   "
 echo " ╚══════╝╚═╝  ╚═╝╚═╝     ╚═╝  ╚═╝╚══════╝   ╚═╝   "
 echo -e "                            ${MAGENTA}on remittor Manager${NC}"
-echo "https://github.com/bol-van/zapret";
-echo "https://github.com/remittor/zapret-openwrt";
+echo -e "${GRAY}https://github.com/bol-van/zapret${NC}";
+echo -e "${GRAY}https://github.com/remittor/zapret-openwrt${NC}";
 
 echo -e ""
 echo -e "${YELLOW}Установленная версия на устройстве: ${INST_COLOR}$INSTALLED_VER${NC}"
