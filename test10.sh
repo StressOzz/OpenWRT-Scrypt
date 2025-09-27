@@ -19,8 +19,8 @@ echo "https://github.com/bol-van/zapret";
 echo "https://github.com/remittor/zapret-openwrt";
 
 echo -e ""
-echo -e "${YELLOW}Установленная версия: ${INST_COLOR}$INSTALLED_VER${NC}"
-echo -e "${YELLOW}Последняя версия на GitHub: ${CYAN}$LATEST_VER${NC}"
+echo -e "${YELLOW}Установленная версия на устройстве: ${INST_COLOR}$INSTALLED_VER${NC}"
+echo -e "${YELLOW}Последняя релизная версия с GitHub: ${CYAN}$LATEST_VER${NC}"
 echo -e ""
 echo -e "${YELLOW}Архитектура устройства: ${NC}$LOCAL_ARCH"
 echo -e ""
