@@ -18,19 +18,15 @@ echo "https://github.com/bol-van/zapret";
 echo "https://github.com/remittor/zapret-openwrt";
 
 echo -e ""
-    echo -e "${MAGENTA}ZAPRET on remittor Manager${NC}"
-
-    # Цвет установленной версии (зелёный = актуальна, красный = не актуальна)
-    [ "$INSTALLED_VER" = "$LATEST_VER" ] && INST_COLOR=$GREEN || INST_COLOR=$RED
-
-    echo -e ""
-    echo -e "${YELLOW}Установленная версия: ${INST_COLOR}$INSTALLED_VER${NC}"
-    echo -e "${YELLOW}Последняя версия на GitHub: ${CYAN}$LATEST_VER${NC}"
-    echo -e ""
-    echo -e "${YELLOW}Архитектура устройства: ${NC}$LOCAL_ARCH"
-    echo -e ""
-    echo -e "${GREEN}1) Установить или обновить${NC}"
-    echo -e "${GREEN}2) Удалить${NC}"
-    echo -e "${GREEN}3) Выход (Enter)${NC}"
-    echo -e ""
-    echo -n "Выберите пункт: "
+echo -e "${MAGENTA}ZAPRET on remittor Manager${NC}"
+echo -e ""
+echo -e "${YELLOW}Установленная версия: ${INST_COLOR}$INSTALLED_VER${NC}"
+echo -e "${YELLOW}Последняя версия на GitHub: ${CYAN}$LATEST_VER${NC}"
+echo -e ""
+echo -e "${YELLOW}Архитектура устройства: ${NC}$LOCAL_ARCH"
+echo -e ""
+echo -e "${GREEN}1) Установить или обновить${NC}"
+echo -e "${GREEN}2) Удалить${NC}"
+echo -e "${GREEN}3) Выход (Enter)${NC}"
+echo -e ""
+echo -n "Выберите пункт: "
