@@ -79,9 +79,14 @@ show_menu() {
     # Цвет установленной версии (зелёный = актуальна, красный = не актуальна)
     [ "$INSTALLED_VER" = "$LATEST_VER" ] && INST_COLOR=$GREEN || INST_COLOR=$RED
 
-    # Добавляем отметку "актуальна", если версия совпадает с последней
+    # Добавляем отметку "актуальна" или "устарела"
+    if [ "$INSTALLED_VER" = "$LATEST_VER" ]; then
+    INSTALLED_DISPLAY="$INSTALLED_VER (актуальна)"
+    elif [ "$INSTALLED_VER" != "не найдена" ]; then
+    INSTALLED_DISPLAY="$INSTALLED_VER (устарела)"
+    else
     INSTALLED_DISPLAY="$INSTALLED_VER"
-    [ "$INSTALLED_VER" = "$LATEST_VER (устарела)" ] && INSTALLED_DISPLAY="$INSTALLED_VER (последняя)"
+    fi
 
     echo -e ""
     echo -e "${YELLOW}Установленная версия: ${INST_COLOR}$INSTALLED_DISPLAY${NC}"
