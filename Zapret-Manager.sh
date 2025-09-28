@@ -98,15 +98,36 @@ show_menu() {
     echo -e ""
     echo -e "${GREEN}1) Установить/обновить до последней версии${NC}"
     echo -e "${GREEN}2) Установить предыдущию версию${NC}"
-    echo -e "${GREEN}3) Удалить Zapret${NC}"
-    echo -e "${GREEN}4) Выход (Enter)${NC}"
+    echo -e "${GREEN}3) Вернуть настройки по умолчанию${NC}"
+    echo -e "${GREEN}4) Удалить Zapret${NC}"
+    echo -e "${GREEN}5) Выход (Enter)${NC}"
     echo -e ""
     echo -n "Выберите пункт: "
     read choice
     case "$choice" in
         1) install_update "latest" ;;
         2) install_update "prev" ;;
-        3) uninstall_zapret ;;
+        3) 
+            clear
+            echo -e ""
+            echo -e "${MAGENTA}Возврат к настройкам по умолчанию${NC}"
+            echo -e ""
+            if [ -f /opt/zapret/restore-def-cfg.sh ]; then
+                [ -f /etc/init.d/zapret ] && /etc/init.d/zapret stop >/dev/null 2>&1
+                chmod +x /opt/zapret/restore-def-cfg.sh
+                /opt/zapret/restore-def-cfg.sh
+                chmod +x /opt/zapret/sync_config.sh
+                /opt/zapret/sync_config.sh
+                [ -f /etc/init.d/zapret ] && /etc/init.d/zapret restart >/dev/null 2>&1
+                echo -e "${BLUE}🔴 ${GREEN}Настройки возвращены, сервис перезапущен${NC}"
+            else
+                echo -e "${RED}Zapret не установлен !${NC}"
+            fi
+            echo -e ""
+            read -p "Нажмите Enter для продолжения..." dummy
+            show_menu
+            ;;
+        4) uninstall_zapret ;;
         *) exit 0 ;;
     esac
 }
@@ -187,6 +208,8 @@ install_update() {
 
     [ -f /etc/init.d/zapret ] && {
         echo -e "${GREEN}🔴 ${CYAN}Перезапуск службы ${NC}zapret"
+        chmod +x /opt/zapret/sync_config.sh
+        /opt/zapret/sync_config.sh
         /etc/init.d/zapret restart >/dev/null 2>&1
     }
 
