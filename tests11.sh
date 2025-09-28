@@ -114,8 +114,10 @@ show_menu() {
             echo -e ""
         [ -f /etc/init.d/zapret ] && /etc/init.d/zapret stop >/dev/null 2>&1
         [ -f /root/restore-def-cfg.sh ] && sh /opt/zapret/restore-def-cfg.sh
+        [ -f /root/restore-def-cfg.sh ] && sh /opt/zapret/def-cfg.sh
         [ -f /etc/init.d/zapret ] && /etc/init.d/zapret restart >/dev/null 2>&1
             echo -e "${BLUE}🔴 ${GREEN}Настройки возвращены, сервис перезапущен${NC}"
+            echo -e ""
             read -p "Нажмите Enter для продолжения..." dummy
             show_menu
             ;;
