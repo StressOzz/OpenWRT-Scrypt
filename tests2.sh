@@ -67,7 +67,6 @@ get_versions() {
     fi
 }
 
-
 # ==========================================
 # Главное меню
 # ==========================================
@@ -80,8 +79,12 @@ show_menu() {
     # Цвет установленной версии (зелёный = актуальна, красный = не актуальна)
     [ "$INSTALLED_VER" = "$LATEST_VER" ] && INST_COLOR=$GREEN || INST_COLOR=$RED
 
+    # Добавляем отметку "актуальна", если версия совпадает с последней
+    INSTALLED_DISPLAY="$INSTALLED_VER"
+    [ "$INSTALLED_VER" = "$LATEST_VER" ] && INSTALLED_DISPLAY="$INSTALLED_VER (последняя)"
+
     echo -e ""
-    echo -e "${YELLOW}Установленная версия: ${INST_COLOR}$INSTALLED_VER${NC}"
+    echo -e "${YELLOW}Установленная версия: ${INST_COLOR}$INSTALLED_DISPLAY${NC}"
     echo -e "${YELLOW}Последняя версия на GitHub: ${CYAN}$LATEST_VER${NC}"
     echo -e "${YELLOW}Предыдущая версия на GitHub: ${CYAN}$PREV_VER${NC}"
     echo -e ""
