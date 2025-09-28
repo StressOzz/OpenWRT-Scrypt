@@ -12,7 +12,7 @@ YELLOW="\033[1;33m"
 MAGENTA="\033[1;35m"
 BLUE="\033[0;34m"
 NC="\033[0m"
-GRAY='\033[38;5;236m'
+GRAY='\033[38;5;239m'
 
 # Рабочая директория для скачивания и распаковки
 WORKDIR="/tmp/zapret-update"
@@ -82,7 +82,7 @@ show_menu() {
     echo "  ███╔╝  ██╔══██║██╔═══╝ ██╔══██╗██╔══╝     ██║   "
     echo " ███████╗██║  ██║██║     ██║  ██║███████╗   ██║   "
     echo " ╚══════╝╚═╝  ╚═╝╚═╝     ╚═╝  ╚═╝╚══════╝   ╚═╝   "
-    echo -e "                    ${MAGENTA}on remittor Manager by StreeOzz☢️${NC}"
+    echo -e "             ${MAGENTA}on remittor Manager by StreeOzz${NC}"
     echo -e "${GRAY}https://github.com/bol-van/zapret${NC}";
     echo -e "${GRAY}https://github.com/remittor/zapret-openwrt${NC}";
 
