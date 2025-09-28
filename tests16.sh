@@ -109,21 +109,21 @@ show_menu() {
         2) install_update "prev" ;;
         3) 
             clear
-    echo -e ""
-    echo -e "${MAGENTA}Возврат к настройкам по умолчанию${NC}"
-    echo -e ""
-    if [ -f /opt/zapret/restore-def-cfg.sh ]; then
-        [ -f /etc/init.d/zapret ] && /etc/init.d/zapret stop >/dev/null 2>&1
-        /opt/zapret/restore-def-cfg.sh
-        [ -f /etc/init.d/zapret ] && /etc/init.d/zapret restart >/dev/null 2>&1
-        echo -e "${BLUE}🔴 ${GREEN}Настройки возвращены, сервис перезапущен${NC}"
-    else
-        echo -e "${RED}Zapret не установлен !${NC}"
-    fi
-    echo -e ""
-    read -p "Нажмите Enter для продолжения..." dummy
-    show_menu
-    ;;
+            echo -e ""
+            echo -e "${MAGENTA}Возврат к настройкам по умолчанию${NC}"
+            echo -e ""
+            if [ -f /opt/zapret/restore-def-cfg.sh ]; then
+                [ -f /etc/init.d/zapret ] && /etc/init.d/zapret stop >/dev/null 2>&1
+                /opt/zapret/restore-def-cfg.sh
+                [ -f /etc/init.d/zapret ] && /etc/init.d/zapret restart >/dev/null 2>&1
+                echo -e "${BLUE}🔴 ${GREEN}Настройки возвращены, сервис перезапущен${NC}"
+            else
+                echo -e "${RED}Zapret не установлен !${NC}"
+            fi
+            echo -e ""
+            read -p "Нажмите Enter для продолжения..." dummy
+            show_menu
+            ;;
         4) uninstall_zapret ;;
         *) exit 0 ;;
     esac
@@ -154,7 +154,6 @@ install_update() {
         echo -e "${RED}[ERROR] Нет доступного пакета для вашей архитектуры: $LOCAL_ARCH${NC}"
         echo -e ""
         read -p "Нажмите Enter для продолжения..." dummy
-        show_menu
         return
     }
 
@@ -162,14 +161,13 @@ install_update() {
         echo -e "${BLUE}🔴 ${GREEN}Эта версия уже установлена !${NC}"
         echo -e ""
         read -p "Нажмите Enter для продолжения..." dummy
-        show_menu
         return
     fi
 
     mkdir -p "$WORKDIR" && cd "$WORKDIR" || return
 
     echo -e "${GREEN}🔴 ${CYAN}Скачиваем архив ${NC}$TARGET_FILE"
-    wget -q "$TARGET_URL" -O "$TARGET_FILE"
+    wget -q "$TARGET_URL" -O "$TARGET_FILE" || { echo -e "${RED}[ERROR] Не удалось скачать $TARGET_FILE${NC}"; read -p "Нажмите Enter для продолжения..." dummy; return; }
 
     command -v unzip >/dev/null 2>&1 || { 
         echo -e "${GREEN}🔴 ${CYAN}Устанавливаем${NC} unzip ${CYAN}для распаковки архива${NC}"
@@ -214,7 +212,6 @@ install_update() {
     echo -e "${BLUE}🔴 ${GREEN}Zapret установлен/обновлен !${NC}"
     echo -e ""
     read -p "Нажмите Enter для продолжения..." dummy
-    show_menu
 }
 
 # ==========================================
@@ -281,10 +278,11 @@ uninstall_zapret() {
     echo -e "${BLUE}🔴 ${GREEN}Zapret полностью удалён !${NC}"
     echo -e ""
     read -p "Нажмите Enter для продолжения..." dummy
-    show_menu
 }
 
 # ==========================================
-# Старт скрипта
+# Старт скрипта (цикл)
 # ==========================================
-show_menu
+while true; do
+    show_menu
+done
