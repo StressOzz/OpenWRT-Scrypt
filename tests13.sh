@@ -118,7 +118,7 @@ show_menu() {
             echo -e "${BLUE}🔴 ${GREEN}Настройки возвращены, сервис перезапущен${NC}"
             echo -e ""
             read -p "Нажмите Enter для продолжения..." dummy
-            get_versions
+            show_menu
             ;;
         4) uninstall_zapret ;;
         *) exit 0 ;;
