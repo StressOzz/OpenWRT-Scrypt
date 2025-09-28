@@ -22,15 +22,12 @@ WORKDIR="/tmp/zapret-update"
 # ==========================================
 
 get_versions() {
-    # Определяем текущую установленную версию Zapret
     INSTALLED_VER=$(opkg list-installed | grep '^zapret ' | awk '{print $3}')
     [ -z "$INSTALLED_VER" ] && INSTALLED_VER="не найдена"
 
-    # Определяем архитектуру роутера
     LOCAL_ARCH=$(awk -F\' '/DISTRIB_ARCH/ {print $2}' /etc/openwrt_release)
     [ -z "$LOCAL_ARCH" ] && LOCAL_ARCH=$(opkg print-architecture | grep -v "noarch" | sort -k3 -n | tail -n1 | awk '{print $2}')
 
-    # Проверяем curl и ставим, если нет
     command -v curl >/dev/null 2>&1 || {
         clear
         echo -e ""
@@ -41,18 +38,14 @@ get_versions() {
         opkg install curl >/dev/null 2>&1
     }
 
-    # Получаем ссылку на последнюю версию для этой архитектуры с GitHub
     LATEST_URL=$(curl -s https://api.github.com/repos/remittor/zapret-openwrt/releases/latest \
         | grep browser_download_url | grep "$LOCAL_ARCH.zip" | cut -d '"' -f 4)
 
-    # Получаем ссылку на предпоследнюю версию
     PREV_URL=$(curl -s https://api.github.com/repos/remittor/zapret-openwrt/releases \
         | grep browser_download_url | grep "$LOCAL_ARCH.zip" | sed -n '2p' | cut -d '"' -f 4)
 
-    # Проверяем, есть ли такие пакеты
     if [ -n "$LATEST_URL" ] && echo "$LATEST_URL" | grep -q '\.zip$'; then
         LATEST_FILE=$(basename "$LATEST_URL")
-        # Из имени файла определяем версию
         LATEST_VER=$(echo "$LATEST_FILE" | sed -E 's/.*zapret_v([0-9]+\.[0-9]+)_.*\.zip/\1/')
         USED_ARCH="$LOCAL_ARCH"
     else
@@ -76,26 +69,24 @@ show_menu() {
     clear
     
     echo ""
-    echo " ███████╗ █████╗ ██████╗ ██████╗ ███████╗████████╗"
-    echo " ╚══███╔╝██╔══██╗██╔══██╗██╔══██╗██╔════╝╚══██╔══╝"
-    echo "   ███╔╝ ███████║██████╔╝██████╔╝█████╗     ██║   "
-    echo "  ███╔╝  ██╔══██║██╔═══╝ ██╔══██╗██╔══╝     ██║   "
-    echo " ███████╗██║  ██║██║     ██║  ██║███████╗   ██║   "
-    echo " ╚══════╝╚═╝  ╚═╝╚═╝     ╚═╝  ╚═╝╚══════╝   ╚═╝   "
+    echo "███████╗ █████╗ ██████╗ ██████╗ ███████╗████████╗"
+    echo "╚══███╔╝██╔══██╗██╔══██╗██╔══██╗██╔════╝╚══██╔══╝"
+    echo "  ███╔╝ ███████║██████╔╝██████╔╝█████╗     ██║   "
+    echo " ███╔╝  ██╔══██║██╔═══╝ ██╔══██╗██╔══╝     ██║   "
+    echo "███████╗██║  ██║██║     ██║  ██║███████╗   ██║   "
+    echo "╚══════╝╚═╝  ╚═╝╚═╝     ╚═╝  ╚═╝╚══════╝   ╚═╝   "
     echo -e "              ${MAGENTA}on remittor Manager by StressOzz${NC}"
     echo -e "${GRAY}https://github.com/bol-van/zapret${NC}";
     echo -e "${GRAY}https://github.com/remittor/zapret-openwrt${NC}";
 
-    # Цвет установленной версии (зелёный = актуальна, красный = не актуальна)
     [ "$INSTALLED_VER" = "$LATEST_VER" ] && INST_COLOR=$GREEN || INST_COLOR=$RED
 
-    # Добавляем отметку "актуальна" или "устарела"
     if [ "$INSTALLED_VER" = "$LATEST_VER" ]; then
-    INSTALLED_DISPLAY="$INSTALLED_VER (актуальна)"
+        INSTALLED_DISPLAY="$INSTALLED_VER (актуальна)"
     elif [ "$INSTALLED_VER" != "не найдена" ]; then
-    INSTALLED_DISPLAY="$INSTALLED_VER (устарела)"
+        INSTALLED_DISPLAY="$INSTALLED_VER (устарела)"
     else
-    INSTALLED_DISPLAY="$INSTALLED_VER"
+        INSTALLED_DISPLAY="$INSTALLED_VER"
     fi
 
     echo -e ""
@@ -107,15 +98,28 @@ show_menu() {
     echo -e ""
     echo -e "${GREEN}1) Установить или обновить (последняя версия)${NC}"
     echo -e "${GREEN}2) Установить предпоследнюю версию${NC}"
-    echo -e "${GREEN}3) Удалить${NC}"
-    echo -e "${GREEN}4) Выход (Enter)${NC}"
+    echo -e "${GREEN}3) Вернуть настройки по умолчанию${NC}"
+    echo -e "${GREEN}4) Удалить Zapret${NC}"
+    echo -e "${GREEN}5) Выход (Enter)${NC}"
     echo -e ""
     echo -n "Выберите пункт: "
     read choice
     case "$choice" in
         1) install_update "latest" ;;
         2) install_update "prev" ;;
-        3) uninstall_zapret ;;
+        3) 
+            clear
+            echo -e ""
+            echo -e "${MAGENTA}Возврат к настройкам по умолчанию${NC}"
+            echo -e ""
+        [ -f /etc/init.d/zapret ] && /etc/init.d/zapret stop >/dev/null 2>&1
+        [ -f /root/restore-def-cfg.sh ] && sh /opt/zapret/restore-def-cfg.sh
+        [ -f /etc/init.d/zapret ] && /etc/init.d/zapret restart >/dev/null 2>&1
+            echo -e "${BLUE}🔴 ${GREEN}Настройки возвращены, сервис перезапущен${NC}"
+            read -p "Нажмите Enter для продолжения..." dummy
+            show_menu
+            ;;
+        4) uninstall_zapret ;;
         *) exit 0 ;;
     esac
 }
