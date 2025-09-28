@@ -81,7 +81,7 @@ show_menu() {
 
     # Добавляем отметку "актуальна", если версия совпадает с последней
     INSTALLED_DISPLAY="$INSTALLED_VER"
-    [ "$INSTALLED_VER" = "$LATEST_VER" ] && INSTALLED_DISPLAY="$INSTALLED_VER (последняя)"
+    [ "$INSTALLED_VER" = "$LATEST_VER (устарела)" ] && INSTALLED_DISPLAY="$INSTALLED_VER (последняя)"
 
     echo -e ""
     echo -e "${YELLOW}Установленная версия: ${INST_COLOR}$INSTALLED_DISPLAY${NC}"
