@@ -82,7 +82,7 @@ show_menu() {
     [ "$INSTALLED_VER" = "$LATEST_VER" ] && INST_COLOR=$GREEN || INST_COLOR=$RED
 
     if [ "$INSTALLED_VER" = "$LATEST_VER" ]; then
-        INSTALLED_DISPLAY="$INSTALLED_VER (актуальна)"
+        INSTALLED_DISPLAY="$INSTALLED_VER (актуальная)"
     elif [ "$INSTALLED_VER" != "не найдена" ]; then
         INSTALLED_DISPLAY="$INSTALLED_VER (устарела)"
     else
@@ -109,17 +109,21 @@ show_menu() {
         2) install_update "prev" ;;
         3) 
             clear
-            echo -e ""
-            echo -e "${MAGENTA}Возврат к настройкам по умолчанию${NC}"
-            echo -e ""
-[ -f /etc/init.d/zapret ] && /etc/init.d/zapret stop >/dev/null 2>&1
-/opt/zapret/restore-def-cfg.sh
-[ -f /etc/init.d/zapret ] && /etc/init.d/zapret restart >/dev/null 2>&1
-            echo -e "${BLUE}🔴 ${GREEN}Настройки возвращены, сервис перезапущен${NC}"
-            echo -e ""
-            read -p "Нажмите Enter для продолжения..." dummy
-            show_menu
-            ;;
+    echo -e ""
+    echo -e "${MAGENTA}Возврат к настройкам по умолчанию${NC}"
+    echo -e ""
+    if [ -f /opt/zapret/restore-def-cfg.sh ]; then
+        [ -f /etc/init.d/zapret ] && /etc/init.d/zapret stop >/dev/null 2>&1
+        /opt/zapret/restore-def-cfg.sh
+        [ -f /etc/init.d/zapret ] && /etc/init.d/zapret restart >/dev/null 2>&1
+        echo -e "${BLUE}🔴 ${GREEN}Настройки возвращены, сервис перезапущен${NC}"
+    else
+        echo -e "${RED}Zapret не установлен !${NC}"
+    fi
+    echo -e ""
+    read -p "Нажмите Enter для продолжения..." dummy
+    show_menu
+    ;;
         4) uninstall_zapret ;;
         *) exit 0 ;;
     esac
