@@ -82,7 +82,7 @@ show_menu() {
     echo "  ███╔╝  ██╔══██║██╔═══╝ ██╔══██╗██╔══╝     ██║   "
     echo " ███████╗██║  ██║██║     ██║  ██║███████╗   ██║   "
     echo " ╚══════╝╚═╝  ╚═╝╚═╝     ╚═╝  ╚═╝╚══════╝   ╚═╝   "
-    echo -e "                            ${MAGENTA}on remittor Manager${NC}"
+    echo -e "                    ${MAGENTA}on remittor Manager by StreeOzz☢️${NC}"
     echo -e "${GRAY}https://github.com/bol-van/zapret${NC}";
     echo -e "${GRAY}https://github.com/remittor/zapret-openwrt${NC}";
 
