@@ -12,6 +12,7 @@ YELLOW="\033[1;33m"
 MAGENTA="\033[1;35m"
 BLUE="\033[0;34m"
 NC="\033[0m"
+GRAY='\033[38;5;236m'
 
 # Рабочая директория для скачивания и распаковки
 WORKDIR="/tmp/zapret-update"
@@ -73,8 +74,17 @@ get_versions() {
 show_menu() {
     get_versions
     clear
-    echo -e ""
-    echo -e "${MAGENTA}ZAPRET on remittor Manager${NC}"
+    
+    echo ""
+    echo " ███████╗ █████╗ ██████╗ ██████╗ ███████╗████████╗"
+    echo " ╚══███╔╝██╔══██╗██╔══██╗██╔══██╗██╔════╝╚══██╔══╝"
+    echo "   ███╔╝ ███████║██████╔╝██████╔╝█████╗     ██║   "
+    echo "  ███╔╝  ██╔══██║██╔═══╝ ██╔══██╗██╔══╝     ██║   "
+    echo " ███████╗██║  ██║██║     ██║  ██║███████╗   ██║   "
+    echo " ╚══════╝╚═╝  ╚═╝╚═╝     ╚═╝  ╚═╝╚══════╝   ╚═╝   "
+    echo -e "                            ${MAGENTA}on remittor Manager${NC}"
+    echo -e "${GRAY}https://github.com/bol-van/zapret${NC}";
+    echo -e "${GRAY}https://github.com/remittor/zapret-openwrt${NC}";
 
     # Цвет установленной версии (зелёный = актуальна, красный = не актуальна)
     [ "$INSTALLED_VER" = "$LATEST_VER" ] && INST_COLOR=$GREEN || INST_COLOR=$RED
