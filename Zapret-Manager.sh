@@ -76,17 +76,20 @@ show_menu() {
     echo "███████╗██║  ██║██║     ██║  ██║███████╗   ██║   "
     echo "╚══════╝╚═╝  ╚═╝╚═╝     ╚═╝  ╚═╝╚══════╝   ╚═╝   "
     echo -e "              ${MAGENTA}on remittor Manager by StressOzz${NC}"
-    echo -e "${GRAY}https://github.com/bol-van/zapret${NC}";
-    echo -e "${GRAY}https://github.com/remittor/zapret-openwrt${NC}";
+    echo -e "${GRAY}https://github.com/bol-van/zapret${NC}"
+    echo -e "${GRAY}https://github.com/remittor/zapret-openwrt${NC}"
 
     [ "$INSTALLED_VER" = "$LATEST_VER" ] && INST_COLOR=$GREEN || INST_COLOR=$RED
 
     if [ "$INSTALLED_VER" = "$LATEST_VER" ]; then
         INSTALLED_DISPLAY="$INSTALLED_VER (актуальная)"
+        MENU1_TEXT="Установить последнюю версию"
     elif [ "$INSTALLED_VER" != "не найдена" ]; then
         INSTALLED_DISPLAY="$INSTALLED_VER (устарела)"
+        MENU1_TEXT="Обновить до последней версии"
     else
         INSTALLED_DISPLAY="$INSTALLED_VER"
+        MENU1_TEXT="Установить последнюю версию"
     fi
 
     echo -e ""
@@ -96,8 +99,8 @@ show_menu() {
     echo -e ""
     echo -e "${YELLOW}Архитектура устройства: ${NC}$LOCAL_ARCH"
     echo -e ""
-    echo -e "${GREEN}1) Установить/обновить до последней версии${NC}"
-    echo -e "${GREEN}2) Установить предыдущию версию${NC}"
+    echo -e "${GREEN}1) $MENU1_TEXT${NC}"
+    echo -e "${GREEN}2) Установить предыдущую версию${NC}"
     echo -e "${GREEN}3) Вернуть настройки по умолчанию${NC}"
     echo -e "${GREEN}4) Удалить Zapret${NC}"
     echo -e "${GREEN}5) Выход (Enter)${NC}"
@@ -107,7 +110,7 @@ show_menu() {
     case "$choice" in
         1) install_update "latest" ;;
         2) install_update "prev" ;;
-        3) 
+        3)
             clear
             echo -e ""
             echo -e "${MAGENTA}Возврат к настройкам по умолчанию${NC}"
