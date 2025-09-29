@@ -281,7 +281,7 @@ show_menu() {
                 chmod +x /opt/zapret/sync_config.sh
                 /opt/zapret/sync_config.sh
                 [ -f /etc/init.d/zapret ] && /etc/init.d/zapret restart >/dev/null 2>&1
-                echo -e "${BLUE}🔴 ${GREEN}Настройки возвращены, сервис перезапущен${NC}"
+                echo -e "${BLUE}🔴 ${GREEN}Настройки возвращены, сервис перезапущен !${NC}"
             else
                 echo -e "${GREEN}🔴 ${RED}Zapret не установлен !${NC}"
             fi
