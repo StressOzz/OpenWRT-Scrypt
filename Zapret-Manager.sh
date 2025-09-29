@@ -278,7 +278,7 @@ show_menu() {
     echo -e "███████╗██║  ██║██║     ██║  ██║███████╗   ██║   "
     echo -e "╚══════╝╚═╝  ╚═╝╚═╝     ╚═╝  ╚═╝╚══════╝   ╚═╝   "
     echo -e "              ${MAGENTA}on remittor Manager by StressOzz${NC}"
-    echo -e "                                          ${DGRAY}v1.6${NC}"
+    echo -e "                                          ${DGRAY}v1.7${NC}"
     echo -e "${GRAY}https://github.com/bol-van/zapret${NC}"
     echo -e "${GRAY}https://github.com/remittor/zapret-openwrt${NC}"
 
