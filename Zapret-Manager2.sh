@@ -19,7 +19,7 @@ DGRAY='\033[38;5;236m'
 WORKDIR="/tmp/zapret-update"
 
 # ==========================================
-# Функция получения информации о версиях и архитектуре
+# Функция получения информации о версиях, архитектуре и статусе
 # ==========================================
 get_versions() {
     INSTALLED_VER=$(opkg list-installed | grep '^zapret ' | awk '{print $3}')
@@ -59,6 +59,17 @@ get_versions() {
     else
         PREV_VER="не найдена"
     fi
+
+    # --- Новый блок: проверка статуса Zapret ---
+    if [ -f /etc/init.d/zapret ]; then
+        if /etc/init.d/zapret status 2>/dev/null | grep -qi "running"; then
+            ZAPRET_STATUS="${GREEN}Zapret запущен${NC}"
+        else
+            ZAPRET_STATUS="${RED}Zapret остановлен${NC}"
+        fi
+    else
+        ZAPRET_STATUS=""   # <-- если не установлен – пустая строка
+    fi
 }
 
 # ==========================================
@@ -77,6 +88,18 @@ install_update() {
     echo -e ""
     get_versions
 
+    # --- Новый блок: Остановка сервиса до скачивания ---
+    if [ -f /etc/init.d/zapret ]; then
+        echo -e "${GREEN}🔴 ${CYAN}Останавливаем сервис ${NC}zapret перед скачиванием"
+        /etc/init.d/zapret stop >/dev/null 2>&1
+        PIDS=$(pgrep -f /opt/zapret)
+        if [ -n "$PIDS" ]; then
+            echo -e "${GREEN}🔴 ${CYAN}Убиваем все процессы ${NC}zapret"
+            for pid in $PIDS; do kill -9 "$pid" >/dev/null 2>&1; done
+        fi
+    fi
+    # --- конец нового блока ---
+
     TARGET="$1"
     if [ "$TARGET" = "prev" ]; then
         TARGET_URL="$PREV_URL"
@@ -87,135 +110,59 @@ install_update() {
         TARGET_FILE="$LATEST_FILE"
         TARGET_VER="$LATEST_VER"
     fi
-
     [ "$USED_ARCH" = "нет пакета для вашей архитектуры" ] && {
         echo -e "${RED}[ERROR] Нет доступного пакета для вашей архитектуры: $LOCAL_ARCH${NC}"
         echo -e ""
         read -p "Нажмите Enter для продолжения..." dummy
         return
     }
-
     if [ "$INSTALLED_VER" = "$TARGET_VER" ]; then
         echo -e "${BLUE}🔴 ${GREEN}Эта версия уже установлена !${NC}"
         echo -e ""
         read -p "Нажмите Enter для продолжения..." dummy
         return
     fi
-
     mkdir -p "$WORKDIR" && cd "$WORKDIR" || return
-
     echo -e "${GREEN}🔴 ${CYAN}Скачиваем архив ${NC}$TARGET_FILE"
     wget -q "$TARGET_URL" -O "$TARGET_FILE" || { echo -e "${RED}[ERROR] Не удалось скачать $TARGET_FILE${NC}"; read -p "Нажмите Enter для продолжения..." dummy; return; }
-
     command -v unzip >/dev/null 2>&1 || { 
         echo -e "${GREEN}🔴 ${CYAN}Устанавливаем${NC} unzip ${CYAN}для распаковки архива${NC}"
         opkg update >/dev/null 2>&1
         opkg install unzip >/dev/null 2>&1
     }
-
     echo -e "${GREEN}🔴 ${CYAN}Распаковываем архив${NC}"
     unzip -o "$TARGET_FILE" >/dev/null
-
     [ -f /etc/init.d/zapret ] && {
         echo -e "${GREEN}🔴 ${CYAN}Останавливаем сервис ${NC}zapret"
         /etc/init.d/zapret stop >/dev/null 2>&1
     }
-
     PIDS=$(pgrep -f /opt/zapret)
     if [ -n "$PIDS" ]; then
         echo -e "${GREEN}🔴 ${CYAN}Убиваем все процессы ${NC}zapret"
         for pid in $PIDS; do kill -9 "$pid" >/dev/null 2>&1; done
     fi
-
     for PKG in zapret_*.ipk luci-app-zapret_*.ipk; do
         [ -f "$PKG" ] && {
             echo -e "${GREEN}🔴 ${CYAN}Устанавливаем пакет ${NC}$PKG"
             opkg install --force-reinstall "$PKG" >/dev/null 2>&1
         }
     done
-
     echo -e "${GREEN}🔴 ${CYAN}Удаляем временные файлы и пакеты${NC}"
     cd /
     rm -rf "$WORKDIR"
     rm -f /tmp/*.ipk /tmp/*.zip /tmp/*zapret* 2>/dev/null
-
     [ -f /etc/init.d/zapret ] && {
         echo -e "${GREEN}🔴 ${CYAN}Перезапуск службы ${NC}zapret"
         chmod +x /opt/zapret/sync_config.sh
         /opt/zapret/sync_config.sh
         /etc/init.d/zapret restart >/dev/null 2>&1
     }
-
     echo -e ""
     if [ "$ACTION" = "update" ]; then
         echo -e "${BLUE}🔴 ${GREEN}Zapret успешно обновлён !${NC}"
     else
         echo -e "${BLUE}🔴 ${GREEN}Zapret успешно установлен !${NC}"
     fi
-    echo -e ""
-    read -p "Нажмите Enter для продолжения..." dummy
-}
-
-# ==========================================
-# Полное удаление Zapret
-# ==========================================
-uninstall_zapret() {
-    clear
-    echo -e ""
-    echo -e "${MAGENTA}Начинаем удаление ZAPRET${NC}"
-    echo -e ""
-
-    [ -f /etc/init.d/zapret ] && {
-        echo -e "${GREEN}🔴 ${CYAN}Останавливаем сервис ${NC}zapret"
-        /etc/init.d/zapret stop >/dev/null 2>&1
-    }
-
-    PIDS=$(pgrep -f /opt/zapret)
-    if [ -n "$PIDS" ]; then
-        echo -e "${GREEN}🔴 ${CYAN}Убиваем все процессы ${NC}zapret"
-        for pid in $PIDS; do kill -9 "$pid" >/dev/null 2>&1; done
-    fi
-
-    echo -e "${GREEN}🔴 ${CYAN}Удаляем пакеты${NC} zapret ${CYAN}и ${NC}luci-app-zapret"
-    opkg remove --force-removal-of-dependent-packages zapret luci-app-zapret >/dev/null 2>&1
-
-    echo -e "${GREEN}🔴 ${CYAN}Удаляем конфигурации и рабочие папки${NC}"
-    for path in /opt/zapret /etc/config/zapret /etc/firewall.zapret; do [ -e "$path" ] && rm -rf "$path"; done
-
-    if crontab -l >/dev/null 2>&1; then
-        crontab -l | grep -v -i "zapret" | crontab -
-        echo -e "${GREEN}🔴 ${CYAN}Очищаем${NC} crontab ${CYAN}задания${NC}"
-    fi
-
-    echo -e "${GREEN}🔴 ${CYAN}Удаляем${NC} ipset"
-    for set in $(ipset list -n 2>/dev/null | grep -i zapret); do ipset destroy "$set" >/dev/null 2>&1; done
-
-    echo -e "${GREEN}🔴 ${CYAN}Удаляем временные файлы${NC}"
-    rm -f /tmp/*zapret* /var/run/*zapret* 2>/dev/null
-
-    echo -e "${GREEN}🔴 ${CYAN}Удаляем цепочки и таблицы${NC} nftables"
-    for table in $(nft list tables 2>/dev/null | awk '{print $2}'); do
-        chains=$(nft list table $table 2>/dev/null | grep -i 'chain .*zapret' | awk '{print $2}')
-        for chain in $chains; do nft delete chain $table $chain >/dev/null 2>&1; done
-    done
-    for table in $(nft list tables 2>/dev/null | awk '{print $2}' | grep -i zapret); do nft delete table $table >/dev/null 2>&1; done
-
-    [ -f /etc/init.d/zapret ] && {
-        echo -e "${GREEN}🔴 ${CYAN}Отключаем и удаляем${NC} init-скрипт"
-        /etc/init.d/zapret disable >/dev/null 2>&1
-        rm -f /etc/init.d/zapret
-    }
-
-    echo -e "${GREEN}🔴 ${CYAN}Удаляем${NC} hook ${CYAN}скрипты${NC}"
-    HOOK_DIR="/etc/hotplug.d/iface"
-    [ -d "$HOOK_DIR" ] && for f in "$HOOK_DIR"/*zapret*; do [ -f "$f" ] && rm -f "$f"; done
-
-    echo -e "${GREEN}🔴 ${CYAN}Удаляем оставшиеся файлы конфигурации${NC}"
-    EXTRA_FILES="/opt/zapret/config /opt/zapret/config.default /opt/zapret/ipset"
-    for f in $EXTRA_FILES; do [ -e "$f" ] && rm -rf "$f"; done
-
-    echo -e ""
-    echo -e "${BLUE}🔴 ${GREEN}Zapret полностью удалён !${NC}"
     echo -e ""
     read -p "Нажмите Enter для продолжения..." dummy
 }
@@ -255,15 +202,20 @@ show_menu() {
     echo -e "${YELLOW}Установленная версия: ${INST_COLOR}$INSTALLED_DISPLAY${NC}"
     echo -e "${YELLOW}Последняя версия на GitHub: ${NC}$LATEST_VER"
     echo -e "${YELLOW}Предыдущая версия на GitHub: ${CYAN}$PREV_VER${NC}"
-    echo -e ""
     echo -e "${YELLOW}Архитектура устройства: ${NC}$LOCAL_ARCH"
     echo -e ""
+
+    # --- Выводим статус только если не пуст ---
+    [ -n "$ZAPRET_STATUS" ] && echo -e "${YELLOW}Статус службы: ${NC}$ZAPRET_STATUS"
+    echo -e ""
+
     echo -e "${GREEN}1) $MENU1_TEXT${NC}"
     echo -e "${GREEN}2) Установить предыдущую версию${NC}"
     echo -e "${GREEN}3) Вернуть настройки по умолчанию${NC}"
     echo -e "${GREEN}4) Удалить Zapret${NC}"
     echo -e "${GREEN}5) Остановить Zapret${NC}"
-    echo -e "${GREEN}6) Выход (Enter)${NC}"
+    echo -e "${GREEN}6) Запустить Zapret${NC}"
+    echo -e "${GREEN}7) Выход (Enter)${NC}"
     echo -e ""
     echo -n "Выберите пункт: "
     read choice
@@ -305,7 +257,21 @@ show_menu() {
                 echo -e "${GREEN}🔴 ${CYAN}Убиваем все процессы ${NC}Zapret"
                 for pid in $PIDS; do kill -9 "$pid" >/dev/null 2>&1; done
             fi
+            echo -e ""
             echo -e "${BLUE}🔴 ${GREEN}Zapret остановлен !${NC}"
+            echo -e ""
+            read -p "Нажмите Enter для продолжения..." dummy
+            ;;
+        6)
+            clear
+            echo -e ""
+            echo -e "${MAGENTA}Запуск Zapret${NC}"
+            echo -e ""
+            [ -f /etc/init.d/zapret ] && {
+                echo -e "${GREEN}🔴 ${CYAN}Запускаем сервис ${NC}Zapret"
+                /etc/init.d/zapret start >/dev/null 2>&1
+                echo -e "${BLUE}🔴 ${GREEN}Zapret запущен !${NC}"
+            } || echo -e "${RED}Zapret не установлен${NC}"
             echo -e ""
             read -p "Нажмите Enter для продолжения..." dummy
             ;;
