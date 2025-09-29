@@ -63,9 +63,9 @@ get_versions() {
     # --- Новый блок: проверка статуса Zapret ---
     if [ -f /etc/init.d/zapret ]; then
         if /etc/init.d/zapret status 2>/dev/null | grep -qi "running"; then
-            ZAPRET_STATUS="${GREEN}Zapret запущен${NC}"
+            ZAPRET_STATUS="${GREEN}запущен${NC}"
         else
-            ZAPRET_STATUS="${RED}Zapret остановлен${NC}"
+            ZAPRET_STATUS="${RED}остановлен${NC}"
         fi
     else
         ZAPRET_STATUS=""   # <-- если не установлен – пустая строка
@@ -90,7 +90,7 @@ install_update() {
 
     # --- Новый блок: Остановка сервиса до скачивания ---
     if [ -f /etc/init.d/zapret ]; then
-        echo -e "${GREEN}🔴 ${CYAN}Останавливаем сервис ${NC}zapret перед скачиванием"
+        echo -e "${GREEN}🔴 ${CYAN}Останавливаем сервис ${NC}zapret ${CYAN}перед ${NC}скачиванием"
         /etc/init.d/zapret stop >/dev/null 2>&1
         PIDS=$(pgrep -f /opt/zapret)
         if [ -n "$PIDS" ]; then
@@ -202,11 +202,12 @@ show_menu() {
     echo -e "${YELLOW}Установленная версия: ${INST_COLOR}$INSTALLED_DISPLAY${NC}"
     echo -e "${YELLOW}Последняя версия на GitHub: ${NC}$LATEST_VER"
     echo -e "${YELLOW}Предыдущая версия на GitHub: ${CYAN}$PREV_VER${NC}"
+    echo -e ""
     echo -e "${YELLOW}Архитектура устройства: ${NC}$LOCAL_ARCH"
     echo -e ""
 
     # --- Выводим статус только если не пуст ---
-    [ -n "$ZAPRET_STATUS" ] && echo -e "${YELLOW}Статус службы: ${NC}$ZAPRET_STATUS"
+    [ -n "$ZAPRET_STATUS" ] && echo -e "${YELLOW}Статус службы Zapret: ${NC}$ZAPRET_STATUS"
     echo -e ""
 
     echo -e "${GREEN}1) $MENU1_TEXT${NC}"
@@ -270,6 +271,7 @@ show_menu() {
             [ -f /etc/init.d/zapret ] && {
                 echo -e "${GREEN}🔴 ${CYAN}Запускаем сервис ${NC}Zapret"
                 /etc/init.d/zapret start >/dev/null 2>&1
+                echo -e ""
                 echo -e "${BLUE}🔴 ${GREEN}Zapret запущен !${NC}"
             } || echo -e "${RED}Zapret не установлен${NC}"
             echo -e ""
