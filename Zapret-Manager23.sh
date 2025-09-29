@@ -99,7 +99,7 @@ install_update() {
         TARGET_VER="$LATEST_VER"
     fi
     [ "$USED_ARCH" = "нет пакета для вашей архитектуры" ] && {
-        echo -e "${RED}[ERROR] Нет доступного пакета для вашей архитектуры: $LOCAL_ARCH${NC}"
+        echo -e "${RED}Нет доступного пакета для вашей архитектуры: ${NC}$LOCAL_ARCH"
         echo -e ""
         read -p "Нажмите Enter для продолжения..." dummy
         return
@@ -126,7 +126,7 @@ install_update() {
 
     mkdir -p "$WORKDIR" && cd "$WORKDIR" || return
     echo -e "${GREEN}🔴 ${CYAN}Скачиваем архив ${NC}$TARGET_FILE"
-    wget -q "$TARGET_URL" -O "$TARGET_FILE" || { echo -e "${RED}[ERROR] Не удалось скачать $TARGET_FILE${NC}"; read -p "Нажмите Enter для продолжения..." dummy; return; }
+    wget -q "$TARGET_URL" -O "$TARGET_FILE" || { echo -e "${RED}Не удалось скачать ${NC}$TARGET_FILE"; read -p "Нажмите Enter для продолжения..." dummy; return; }
     command -v unzip >/dev/null 2>&1 || { 
         echo -e "${GREEN}🔴 ${CYAN}Устанавливаем${NC} unzip ${CYAN}для распаковки архива${NC}"
         opkg update >/dev/null 2>&1
@@ -321,7 +321,7 @@ show_menu() {
                 echo -e ""
                 echo -e "${BLUE}🔴 ${GREEN}Zapret остановлен !${NC}"
             else
-                echo -e "${RED}Zapret не установлен${NC}"
+                echo -e "${GREEN}🔴 ${RED}Zapret не установлен !${NC}"
             fi
             echo -e ""
             read -p "Нажмите Enter для продолжения..." dummy
@@ -337,7 +337,7 @@ show_menu() {
                 echo -e ""
                 echo -e "${BLUE}🔴 ${GREEN}Zapret запущен !${NC}"
             else
-                echo -e "${RED}Zapret не установлен${NC}"
+                echo -e "${GREEN}🔴 ${RED}Zapret не установлен !${NC}"
             fi
             echo -e ""
             read -p "Нажмите Enter для продолжения..." dummy
