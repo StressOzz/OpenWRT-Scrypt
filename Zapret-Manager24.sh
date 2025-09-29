@@ -298,7 +298,7 @@ show_menu() {
                 [ -f /etc/init.d/zapret ] && /etc/init.d/zapret restart >/dev/null 2>&1
                 echo -e "${BLUE}🔴 ${GREEN}Настройки возвращены, сервис перезапущен !${NC}"
             else
-                echo -e "${GREEN}🔴 ${RED}Zapret не установлен !${NC}"
+                echo -e "${RED}Zapret не установлен !${NC}"
             fi
             echo -e ""
             read -p "Нажмите Enter для продолжения..." dummy
@@ -321,7 +321,7 @@ show_menu() {
                 echo -e ""
                 echo -e "${BLUE}🔴 ${GREEN}Zapret остановлен !${NC}"
             else
-                echo -e "${GREEN}🔴 ${RED}Zapret не установлен !${NC}"
+                echo -e "${RED}Zapret не установлен !${NC}"
             fi
             echo -e ""
             read -p "Нажмите Enter для продолжения..." dummy
@@ -337,7 +337,7 @@ show_menu() {
                 echo -e ""
                 echo -e "${BLUE}🔴 ${GREEN}Zapret запущен !${NC}"
             else
-                echo -e "${GREEN}🔴 ${RED}Zapret не установлен !${NC}"
+                echo -e "${RED}Zapret не установлен !${NC}"
             fi
             echo -e ""
             read -p "Нажмите Enter для продолжения..." dummy
