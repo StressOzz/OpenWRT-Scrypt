@@ -1,6 +1,6 @@
 #!/bin/sh
 # ==========================================
-# Zapret on remittor Manager
+# Zapret on remittor Manager by StressOzz
 # Скрипт для установки, обновления и полного удаления Zapret на OpenWRT
 # ==========================================
 
@@ -21,7 +21,6 @@ WORKDIR="/tmp/zapret-update"
 # ==========================================
 # Функция получения информации о версиях и архитектуре
 # ==========================================
-
 get_versions() {
     INSTALLED_VER=$(opkg list-installed | grep '^zapret ' | awk '{print $3}')
     [ -z "$INSTALLED_VER" ] && INSTALLED_VER="не найдена"
@@ -32,7 +31,7 @@ get_versions() {
     command -v curl >/dev/null 2>&1 || {
         clear
         echo -e ""
-        echo -e "${MAGENTA}ZAPRET on remittor Manager${NC}"
+        echo -e "${MAGENTA}ZAPRET on remittor Manager by StressOzz${NC}"
         echo -e ""
         echo -e "${GREEN}🔴 ${CYAN}Устанавливаем${NC} curl ${CYAN}для загрузки информации с ${NC}GitHub"
         opkg update >/dev/null 2>&1
@@ -63,87 +62,18 @@ get_versions() {
 }
 
 # ==========================================
-# Главное меню
-# ==========================================
-show_menu() {
-    get_versions
-    clear
-    
-    echo -e ""
-    echo -e "███████╗ █████╗ ██████╗ ██████╗ ███████╗████████╗"
-    echo -e "╚══███╔╝██╔══██╗██╔══██╗██╔══██╗██╔════╝╚══██╔══╝"
-    echo -e "  ███╔╝ ███████║██████╔╝██████╔╝█████╗     ██║   "
-    echo -e " ███╔╝  ██╔══██║██╔═══╝ ██╔══██╗██╔══╝     ██║   "
-    echo -e "███████╗██║  ██║██║     ██║  ██║███████╗   ██║   "
-    echo -e "╚══════╝╚═╝  ╚═╝╚═╝     ╚═╝  ╚═╝╚══════╝   ╚═╝   "
-    echo -e "              ${MAGENTA}on remittor Manager by StressOzz${NC}"
-    echo -e "                                          ${DGRAY}v1.5${NC}"
-    echo -e "${GRAY}https://github.com/bol-van/zapret${NC}"
-    echo -e "${GRAY}https://github.com/remittor/zapret-openwrt${NC}"
-
-    [ "$INSTALLED_VER" = "$LATEST_VER" ] && INST_COLOR=$GREEN || INST_COLOR=$RED
-
-    if [ "$INSTALLED_VER" = "$LATEST_VER" ]; then
-        INSTALLED_DISPLAY="$INSTALLED_VER (актуальная)"
-        MENU1_TEXT="Установить последнюю версию"
-    elif [ "$INSTALLED_VER" != "не найдена" ]; then
-        INSTALLED_DISPLAY="$INSTALLED_VER (устарела)"
-        MENU1_TEXT="Обновить до последней версии"
-    else
-        INSTALLED_DISPLAY="$INSTALLED_VER"
-        MENU1_TEXT="Установить последнюю версию"
-    fi
-
-    echo -e ""
-    echo -e "${YELLOW}Установленная версия: ${INST_COLOR}$INSTALLED_DISPLAY${NC}"
-    echo -e "${YELLOW}Последняя версия на GitHub: ${NC}$LATEST_VER"
-    echo -e "${YELLOW}Предыдущая версия на GitHub: ${CYAN}$PREV_VER${NC}"
-    echo -e ""
-    echo -e "${YELLOW}Архитектура устройства: ${NC}$LOCAL_ARCH"
-    echo -e ""
-    echo -e "${GREEN}1) $MENU1_TEXT${NC}"
-    echo -e "${GREEN}2) Установить предыдущую версию${NC}"
-    echo -e "${GREEN}3) Вернуть настройки по умолчанию${NC}"
-    echo -e "${GREEN}4) Удалить Zapret${NC}"
-    echo -e "${GREEN}5) Выход (Enter)${NC}"
-    echo -e ""
-    echo -n "Выберите пункт: "
-    read choice
-    case "$choice" in
-        1) install_update "latest" ;;
-        2) install_update "prev" ;;
-        3)
-            clear
-            echo -e ""
-            echo -e "${MAGENTA}Возврат к настройкам по умолчанию${NC}"
-            echo -e ""
-            if [ -f /opt/zapret/restore-def-cfg.sh ]; then
-                [ -f /etc/init.d/zapret ] && /etc/init.d/zapret stop >/dev/null 2>&1
-                chmod +x /opt/zapret/restore-def-cfg.sh
-                /opt/zapret/restore-def-cfg.sh
-                chmod +x /opt/zapret/sync_config.sh
-                /opt/zapret/sync_config.sh
-                [ -f /etc/init.d/zapret ] && /etc/init.d/zapret restart >/dev/null 2>&1
-                echo -e "${BLUE}🔴 ${GREEN}Настройки возвращены, сервис перезапущен${NC}"
-            else
-                echo -e "${RED}Zapret не установлен !${NC}"
-            fi
-            echo -e ""
-            read -p "Нажмите Enter для продолжения..." dummy
-            show_menu
-            ;;
-        4) uninstall_zapret ;;
-        *) exit 0 ;;
-    esac
-}
-
-# ==========================================
 # Установка или обновление
 # ==========================================
 install_update() {
     clear
     echo -e ""
-    echo -e "${MAGENTA}Начинаем установку ZAPRET${NC}"
+    if [ "$INSTALLED_VER" != "не найдена" ]; then
+        echo -e "${MAGENTA}Начинаем обновление ZAPRET${NC}"
+        ACTION="update"
+    else
+        echo -e "${MAGENTA}Начинаем установку ZAPRET${NC}"
+        ACTION="install"
+    fi
     echo -e ""
     get_versions
 
@@ -194,9 +124,7 @@ install_update() {
     PIDS=$(pgrep -f /opt/zapret)
     if [ -n "$PIDS" ]; then
         echo -e "${GREEN}🔴 ${CYAN}Убиваем все процессы ${NC}zapret"
-        for pid in $PIDS; do
-            kill -9 "$pid" >/dev/null 2>&1
-        done
+        for pid in $PIDS; do kill -9 "$pid" >/dev/null 2>&1; done
     fi
 
     for PKG in zapret_*.ipk luci-app-zapret_*.ipk; do
@@ -219,7 +147,11 @@ install_update() {
     }
 
     echo -e ""
-    echo -e "${BLUE}🔴 ${GREEN}Zapret установлен/обновлен !${NC}"
+    if [ "$ACTION" = "update" ]; then
+        echo -e "${BLUE}🔴 ${GREEN}Zapret успешно обновлён до версии ${NC}$TARGET_VER ${GREEN}!${NC}"
+    else
+        echo -e "${BLUE}🔴 ${GREEN}Zapret успешно установлен (версия ${NC}$TARGET_VER${GREEN}) !${NC}"
+    fi
     echo -e ""
     read -p "Нажмите Enter для продолжения..." dummy
 }
@@ -241,9 +173,7 @@ uninstall_zapret() {
     PIDS=$(pgrep -f /opt/zapret)
     if [ -n "$PIDS" ]; then
         echo -e "${GREEN}🔴 ${CYAN}Убиваем все процессы ${NC}zapret"
-        for pid in $PIDS; do
-            kill -9 "$pid" >/dev/null 2>&1
-        done
+        for pid in $PIDS; do kill -9 "$pid" >/dev/null 2>&1; done
     fi
 
     echo -e "${GREEN}🔴 ${CYAN}Удаляем пакеты${NC} zapret ${CYAN}и ${NC}luci-app-zapret"
@@ -288,6 +218,80 @@ uninstall_zapret() {
     echo -e "${BLUE}🔴 ${GREEN}Zapret полностью удалён !${NC}"
     echo -e ""
     read -p "Нажмите Enter для продолжения..." dummy
+}
+
+# ==========================================
+# Главное меню
+# ==========================================
+show_menu() {
+    get_versions
+    clear
+    echo -e ""
+    echo -e "███████╗ █████╗ ██████╗ ██████╗ ███████╗████████╗"
+    echo -e "╚══███╔╝██╔══██╗██╔══██╗██╔══██╗██╔════╝╚══██╔══╝"
+    echo -e "  ███╔╝ ███████║██████╔╝██████╔╝█████╗     ██║   "
+    echo -e " ███╔╝  ██╔══██║██╔═══╝ ██╔══██╗██╔══╝     ██║   "
+    echo -e "███████╗██║  ██║██║     ██║  ██║███████╗   ██║   "
+    echo -e "╚══════╝╚═╝  ╚═╝╚═╝     ╚═╝  ╚═╝╚══════╝   ╚═╝   "
+    echo -e "              ${MAGENTA}on remittor Manager by StressOzz${NC}"
+    echo -e "                                          ${DGRAY}v1.6${NC}"
+    echo -e "${GRAY}https://github.com/bol-van/zapret${NC}"
+    echo -e "${GRAY}https://github.com/remittor/zapret-openwrt${NC}"
+
+    [ "$INSTALLED_VER" = "$LATEST_VER" ] && INST_COLOR=$GREEN || INST_COLOR=$RED
+
+    if [ "$INSTALLED_VER" = "$LATEST_VER" ]; then
+        INSTALLED_DISPLAY="$INSTALLED_VER (актуальная)"
+        MENU1_TEXT="Установить последнюю версию"
+    elif [ "$INSTALLED_VER" != "не найдена" ]; then
+        INSTALLED_DISPLAY="$INSTALLED_VER (устарела)"
+        MENU1_TEXT="Обновить до последней версии"
+    else
+        INSTALLED_DISPLAY="$INSTALLED_VER"
+        MENU1_TEXT="Установить последнюю версию"
+    fi
+
+    echo -e ""
+    echo -e "${YELLOW}Установленная версия: ${INST_COLOR}$INSTALLED_DISPLAY${NC}"
+    echo -e "${YELLOW}Последняя версия на GitHub: ${NC}$LATEST_VER"
+    echo -e "${YELLOW}Предыдущая версия на GitHub: ${CYAN}$PREV_VER${NC}"
+    echo -e ""
+    echo -e "${YELLOW}Архитектура устройства: ${NC}$LOCAL_ARCH"
+    echo -e ""
+    echo -e "${GREEN}1) $MENU1_TEXT${NC}"
+    echo -e "${GREEN}2) Установить предыдущую версию${NC}"
+    echo -e "${GREEN}3) Вернуть настройки по умолчанию${NC}"
+    echo -e "${GREEN}4) Удалить Zapret${NC}"
+    echo -e "${GREEN}5) Выход (Enter)${NC}"
+    echo -e ""
+    echo -n "Выберите пункт: "
+    read choice
+    case "$choice" in
+        1) install_update "latest" ;;
+        2) install_update "prev" ;;
+        3)
+            clear
+            echo -e ""
+            echo -e "${MAGENTA}Возврат к настройкам по умолчанию${NC}"
+            echo -e ""
+            if [ -f /opt/zapret/restore-def-cfg.sh ]; then
+                [ -f /etc/init.d/zapret ] && /etc/init.d/zapret stop >/dev/null 2>&1
+                chmod +x /opt/zapret/restore-def-cfg.sh
+                /opt/zapret/restore-def-cfg.sh
+                chmod +x /opt/zapret/sync_config.sh
+                /opt/zapret/sync_config.sh
+                [ -f /etc/init.d/zapret ] && /etc/init.d/zapret restart >/dev/null 2>&1
+                echo -e "${BLUE}🔴 ${GREEN}Настройки возвращены, сервис перезапущен${NC}"
+            else
+                echo -e "${GREEN}🔴 ${RED}Zapret не установлен !${NC}"
+            fi
+            echo -e ""
+            read -p "Нажмите Enter для продолжения..." dummy
+            show_menu
+            ;;
+        4) uninstall_zapret ;;
+        *) exit 0 ;;
+    esac
 }
 
 # ==========================================
