@@ -1,4 +1,3 @@
-#!/bin/sh
 # ==========================================
 # Zapret on remittor Manager by StressOzz
 # Скрипт для установки, обновления и полного удаления Zapret на OpenWRT
@@ -89,14 +88,18 @@ install_update() {
     get_versions
 
     # --- Остановка сервиса до скачивания ---
-    if [ -f /etc/init.d/zapret ]; then
-        echo -e "${GREEN}🔴 ${CYAN}Останавливаем сервис ${NC}zapret ${CYAN}перед скачиванием"
-        /etc/init.d/zapret stop >/dev/null 2>&1
-        PIDS=$(pgrep -f /opt/zapret)
-        if [ -n "$PIDS" ]; then
-            echo -e "${GREEN}🔴 ${CYAN}Убиваем все процессы ${NC}zapret"
-            for pid in $PIDS; do kill -9 "$pid" >/dev/null 2>&1; done
+    if [ "$INSTALLED_VER" != "$TARGET_VER" ]; then
+        if [ -f /etc/init.d/zapret ]; then
+            echo -e "${GREEN}🔴 ${CYAN}Останавливаем сервис ${NC}zapret ${CYAN}перед скачиванием"
+            /etc/init.d/zapret stop >/dev/null 2>&1
+            PIDS=$(pgrep -f /opt/zapret)
+            if [ -n "$PIDS" ]; then
+                echo -e "${GREEN}🔴 ${CYAN}Убиваем все процессы ${NC}zapret"
+                for pid in $PIDS; do kill -9 "$pid" >/dev/null 2>&1; done
+            fi
         fi
+    else
+        echo -e "${BLUE}🔴 ${GREEN}Версия совпадает, остановка Zapret не требуется${NC}"
     fi
     # --- конец блока остановки ---
 
@@ -132,7 +135,6 @@ install_update() {
     }
     echo -e "${GREEN}🔴 ${CYAN}Распаковываем архив${NC}"
     unzip -o "$TARGET_FILE" >/dev/null
-    # ----- удалён повторный стоп здесь -----
     PIDS=$(pgrep -f /opt/zapret)
     if [ -n "$PIDS" ]; then
         echo -e "${GREEN}🔴 ${CYAN}Убиваем все процессы ${NC}zapret"
@@ -160,69 +162,6 @@ install_update() {
     else
         echo -e "${BLUE}🔴 ${GREEN}Zapret успешно установлен !${NC}"
     fi
-    echo -e ""
-    read -p "Нажмите Enter для продолжения..." dummy
-}
-# ==========================================
-# Полное удаление Zapret
-# ==========================================
-uninstall_zapret() {
-    clear
-    echo -e ""
-    echo -e "${MAGENTA}Начинаем удаление ZAPRET${NC}"
-    echo -e ""
-
-    [ -f /etc/init.d/zapret ] && {
-        echo -e "${GREEN}🔴 ${CYAN}Останавливаем сервис ${NC}zapret"
-        /etc/init.d/zapret stop >/dev/null 2>&1
-    }
-
-    PIDS=$(pgrep -f /opt/zapret)
-    if [ -n "$PIDS" ]; then
-        echo -e "${GREEN}🔴 ${CYAN}Убиваем все процессы ${NC}zapret"
-        for pid in $PIDS; do kill -9 "$pid" >/dev/null 2>&1; done
-    fi
-
-    echo -e "${GREEN}🔴 ${CYAN}Удаляем пакеты${NC} zapret ${CYAN}и ${NC}luci-app-zapret"
-    opkg remove --force-removal-of-dependent-packages zapret luci-app-zapret >/dev/null 2>&1
-
-    echo -e "${GREEN}🔴 ${CYAN}Удаляем конфигурации и рабочие папки${NC}"
-    for path in /opt/zapret /etc/config/zapret /etc/firewall.zapret; do [ -e "$path" ] && rm -rf "$path"; done
-
-    if crontab -l >/dev/null 2>&1; then
-        crontab -l | grep -v -i "zapret" | crontab -
-        echo -e "${GREEN}🔴 ${CYAN}Очищаем${NC} crontab ${CYAN}задания${NC}"
-    fi
-
-    echo -e "${GREEN}🔴 ${CYAN}Удаляем${NC} ipset"
-    for set in $(ipset list -n 2>/dev/null | grep -i zapret); do ipset destroy "$set" >/dev/null 2>&1; done
-
-    echo -e "${GREEN}🔴 ${CYAN}Удаляем временные файлы${NC}"
-    rm -f /tmp/*zapret* /var/run/*zapret* 2>/dev/null
-
-    echo -e "${GREEN}🔴 ${CYAN}Удаляем цепочки и таблицы${NC} nftables"
-    for table in $(nft list tables 2>/dev/null | awk '{print $2}'); do
-        chains=$(nft list table $table 2>/dev/null | grep -i 'chain .*zapret' | awk '{print $2}')
-        for chain in $chains; do nft delete chain $table $chain >/dev/null 2>&1; done
-    done
-    for table in $(nft list tables 2>/dev/null | awk '{print $2}' | grep -i zapret); do nft delete table $table >/dev/null 2>&1; done
-
-    [ -f /etc/init.d/zapret ] && {
-        echo -e "${GREEN}🔴 ${CYAN}Отключаем и удаляем${NC} init-скрипт"
-        /etc/init.d/zapret disable >/dev/null 2>&1
-        rm -f /etc/init.d/zapret
-    }
-
-    echo -e "${GREEN}🔴 ${CYAN}Удаляем${NC} hook ${CYAN}скрипты${NC}"
-    HOOK_DIR="/etc/hotplug.d/iface"
-    [ -d "$HOOK_DIR" ] && for f in "$HOOK_DIR"/*zapret*; do [ -f "$f" ] && rm -f "$f"; done
-
-    echo -e "${GREEN}🔴 ${CYAN}Удаляем оставшиеся файлы конфигурации${NC}"
-    EXTRA_FILES="/opt/zapret/config /opt/zapret/config.default /opt/zapret/ipset"
-    for f in $EXTRA_FILES; do [ -e "$f" ] && rm -rf "$f"; done
-
-    echo -e ""
-    echo -e "${BLUE}🔴 ${GREEN}Zapret полностью удалён !${NC}"
     echo -e ""
     read -p "Нажмите Enter для продолжения..." dummy
 }
