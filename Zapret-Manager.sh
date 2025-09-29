@@ -148,9 +148,9 @@ install_update() {
 
     echo -e ""
     if [ "$ACTION" = "update" ]; then
-        echo -e "${BLUE}🔴 ${GREEN}Zapret успешно обновлён до версии ${NC}$TARGET_VER ${GREEN}!${NC}"
+        echo -e "${BLUE}🔴 ${GREEN}Zapret успешно обновлён !${NC}"
     else
-        echo -e "${BLUE}🔴 ${GREEN}Zapret успешно установлен (версия ${NC}$TARGET_VER${GREEN}) !${NC}"
+        echo -e "${BLUE}🔴 ${GREEN}Zapret успешно установлен !${NC}"
     fi
     echo -e ""
     read -p "Нажмите Enter для продолжения..." dummy
