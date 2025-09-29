@@ -310,17 +310,19 @@ show_menu() {
             echo -e ""
             echo -e "${MAGENTA}Остановка Zapret${NC}"
             echo -e ""
-            [ -f /etc/init.d/zapret ] && {
+            if [ -f /etc/init.d/zapret ]; then
                 echo -e "${GREEN}🔴 ${CYAN}Останавливаем сервис ${NC}Zapret"
                 /etc/init.d/zapret stop >/dev/null 2>&1
-            }
-            PIDS=$(pgrep -f /opt/zapret)
-            if [ -n "$PIDS" ]; then
-                echo -e "${GREEN}🔴 ${CYAN}Убиваем все процессы ${NC}Zapret"
-                for pid in $PIDS; do kill -9 "$pid" >/dev/null 2>&1; done
+                PIDS=$(pgrep -f /opt/zapret)
+                if [ -n "$PIDS" ]; then
+                    echo -e "${GREEN}🔴 ${CYAN}Убиваем все процессы ${NC}Zapret"
+                    for pid in $PIDS; do kill -9 "$pid" >/dev/null 2>&1; done
+                fi
+                echo -e ""
+                echo -e "${BLUE}🔴 ${GREEN}Zapret остановлен !${NC}"
+            else
+                echo -e "${RED}Zapret не установлен${NC}"
             fi
-            echo -e ""
-            echo -e "${BLUE}🔴 ${GREEN}Zapret остановлен !${NC}"
             echo -e ""
             read -p "Нажмите Enter для продолжения..." dummy
             ;;
@@ -329,12 +331,14 @@ show_menu() {
             echo -e ""
             echo -e "${MAGENTA}Запуск Zapret${NC}"
             echo -e ""
-            [ -f /etc/init.d/zapret ] && {
+            if [ -f /etc/init.d/zapret ]; then
                 echo -e "${GREEN}🔴 ${CYAN}Запускаем сервис ${NC}Zapret"
                 /etc/init.d/zapret start >/dev/null 2>&1
                 echo -e ""
                 echo -e "${BLUE}🔴 ${GREEN}Zapret запущен !${NC}"
-            } || echo -e "${RED}Zapret не установлен${NC}"
+            else
+                echo -e "${RED}Zapret не установлен${NC}"
+            fi
             echo -e ""
             read -p "Нажмите Enter для продолжения..." dummy
             ;;
