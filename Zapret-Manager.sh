@@ -262,7 +262,8 @@ show_menu() {
     echo -e "${GREEN}2) Установить предыдущую версию${NC}"
     echo -e "${GREEN}3) Вернуть настройки по умолчанию${NC}"
     echo -e "${GREEN}4) Удалить Zapret${NC}"
-    echo -e "${GREEN}5) Выход (Enter)${NC}"
+    echo -e "${GREEN}5) Остановить Zapret${NC}"
+    echo -e "${GREEN}6) Выход (Enter)${NC}"
     echo -e ""
     echo -n "Выберите пункт: "
     read choice
@@ -290,6 +291,24 @@ show_menu() {
             show_menu
             ;;
         4) uninstall_zapret ;;
+        5)
+            clear
+            echo -e ""
+            echo -e "${MAGENTA}Остановка Zapret${NC}"
+            echo -e ""
+            [ -f /etc/init.d/zapret ] && {
+                echo -e "${GREEN}🔴 ${CYAN}Останавливаем сервис ${NC}Zapret"
+                /etc/init.d/zapret stop >/dev/null 2>&1
+            }
+            PIDS=$(pgrep -f /opt/zapret)
+            if [ -n "$PIDS" ]; then
+                echo -e "${GREEN}🔴 ${CYAN}Убиваем все процессы ${NC}Zapret"
+                for pid in $PIDS; do kill -9 "$pid" >/dev/null 2>&1; done
+            fi
+            echo -e "${BLUE}🔴 ${GREEN}Zapret остановлен !${NC}"
+            echo -e ""
+            read -p "Нажмите Enter для продолжения..." dummy
+            ;;
         *) exit 0 ;;
     esac
 }
