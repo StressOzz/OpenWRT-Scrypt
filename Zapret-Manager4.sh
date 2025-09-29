@@ -68,7 +68,7 @@ get_versions() {
             ZAPRET_STATUS="${RED}остановлен${NC}"
         fi
     else
-        ZAPRET_STATUS=""   # <-- если не установлен – пустая строка
+        ZAPRET_STATUS=""
     fi
 }
 
@@ -88,7 +88,7 @@ install_update() {
     echo -e ""
     get_versions
 
-    # --- Новый блок: Остановка сервиса до скачивания ---
+    # --- Остановка сервиса до скачивания ---
     if [ -f /etc/init.d/zapret ]; then
         echo -e "${GREEN}🔴 ${CYAN}Останавливаем сервис ${NC}zapret ${CYAN}перед ${NC}скачиванием"
         /etc/init.d/zapret stop >/dev/null 2>&1
@@ -98,7 +98,7 @@ install_update() {
             for pid in $PIDS; do kill -9 "$pid" >/dev/null 2>&1; done
         fi
     fi
-    # --- конец нового блока ---
+    # --- конец блока остановки ---
 
     TARGET="$1"
     if [ "$TARGET" = "prev" ]; then
@@ -132,10 +132,7 @@ install_update() {
     }
     echo -e "${GREEN}🔴 ${CYAN}Распаковываем архив${NC}"
     unzip -o "$TARGET_FILE" >/dev/null
-    [ -f /etc/init.d/zapret ] && {
-        echo -e "${GREEN}🔴 ${CYAN}Останавливаем сервис ${NC}zapret"
-        /etc/init.d/zapret stop >/dev/null 2>&1
-    }
+    # ----- удалён повторный стоп здесь -----
     PIDS=$(pgrep -f /opt/zapret)
     if [ -n "$PIDS" ]; then
         echo -e "${GREEN}🔴 ${CYAN}Убиваем все процессы ${NC}zapret"
@@ -206,7 +203,6 @@ show_menu() {
     echo -e "${YELLOW}Архитектура устройства: ${NC}$LOCAL_ARCH"
     echo -e ""
 
-    # --- Выводим статус только если не пуст ---
     [ -n "$ZAPRET_STATUS" ] && echo -e "${YELLOW}Статус службы Zapret: ${NC}$ZAPRET_STATUS"
     echo -e ""
 
