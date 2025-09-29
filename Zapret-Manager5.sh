@@ -90,7 +90,7 @@ install_update() {
 
     # --- Остановка сервиса до скачивания ---
     if [ -f /etc/init.d/zapret ]; then
-        echo -e "${GREEN}🔴 ${CYAN}Останавливаем сервис ${NC}zapret ${CYAN}перед ${NC}скачиванием"
+        echo -e "${GREEN}🔴 ${CYAN}Останавливаем сервис ${NC}zapret ${CYAN}перед скачиванием"
         /etc/init.d/zapret stop >/dev/null 2>&1
         PIDS=$(pgrep -f /opt/zapret)
         if [ -n "$PIDS" ]; then
