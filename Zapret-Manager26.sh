@@ -123,7 +123,7 @@ install_update() {
 
     # Остановка службы zapret перед установкой/обновлением
     if [ -f /etc/init.d/zapret ]; then
-        echo -e "${GREEN}🔴 ${CYAN}Останавливаем сервис ${NC}zapret ${CYAN}перед скачиванием"
+        echo -e "${GREEN}🔴 ${CYAN}Останавливаем сервис ${NC}zapret"
         /etc/init.d/zapret stop >/dev/null 2>&1
         PIDS=$(pgrep -f /opt/zapret)
         if [ -n "$PIDS" ]; then
