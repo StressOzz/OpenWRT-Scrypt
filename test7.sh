@@ -16,7 +16,7 @@ GRAY='\033[38;5;239m'    # Темно-серый для ссылок
 DGRAY='\033[38;5;236m'   # Очень темный серый для версии
 
 # Рабочая директория для скачивания и распаковки
-WORKDIR="/tmp/zapret-update"  # Временная папка для загрузки архивов
+WORKDIR="/tmp/zapret-update"
 
 # ==========================================
 # Функция получения информации о версиях, архитектуре и статусе
@@ -76,7 +76,6 @@ get_versions() {
 install_update() {
     clear
     echo -e ""
-    # Определяем, обновление или установка
     if [ "$INSTALLED_VER" != "не найдена" ]; then
         echo -e "${MAGENTA}Начинаем обновление ZAPRET${NC}"
         ACTION="update"
@@ -87,31 +86,23 @@ install_update() {
     echo -e ""
     get_versions
 
-    # Выбираем целевую версию для установки
     TARGET="$1"
-    if [ "$TARGET" = "prev" ]; then
+
+    # Если указана конкретная версия вручную
+    if [ "$TARGET" != "latest" ] && [ "$TARGET" != "prev" ]; then
+        TARGET_VER="$TARGET"
+        TARGET_FILE="zapret_v$TARGET_VER_$LOCAL_ARCH.zip"
+        TARGET_URL="https://github.com/remittor/zapret-openwrt/releases/download/v$TARGET_VER/$TARGET_FILE"
+    elif [ "$TARGET" = "prev" ]; then
         TARGET_URL="$PREV_URL"
         TARGET_FILE="$PREV_FILE"
         TARGET_VER="$PREV_VER"
-    elif [ "$TARGET" = "latest" ]; then
+    else
         TARGET_URL="$LATEST_URL"
         TARGET_FILE="$LATEST_FILE"
         TARGET_VER="$LATEST_VER"
-    else
-        # Если передана конкретная версия
-        TARGET_VER="$TARGET"
-        TARGET_URL=$(curl -s https://api.github.com/repos/remittor/zapret-openwrt/releases \
-            | grep browser_download_url | grep "zapret_v$TARGET_VER" | grep "$LOCAL_ARCH.zip" | cut -d '"' -f 4)
-        if [ -z "$TARGET_URL" ]; then
-            echo -e "${RED}Не найден пакет для версии $TARGET_VER и архитектуры $LOCAL_ARCH${NC}"
-            echo -e ""
-            read -p "Нажмите Enter для продолжения..." dummy
-            return
-        fi
-        TARGET_FILE=$(basename "$TARGET_URL")
     fi
 
-    # Проверка архитектуры на доступность пакета
     [ "$USED_ARCH" = "нет пакета для вашей архитектуры" ] && {
         echo -e "${RED}Нет доступного пакета для вашей архитектуры: ${NC}$LOCAL_ARCH"
         echo -e ""
@@ -119,7 +110,6 @@ install_update() {
         return
     }
 
-    # Если версия уже установлена, ничего не делаем
     if [ "$INSTALLED_VER" = "$TARGET_VER" ]; then
         echo -e "${BLUE}🔴 ${GREEN}Эта версия уже установлена !${NC}"
         echo -e ""
@@ -127,41 +117,29 @@ install_update() {
         return
     fi
 
-    # Остановка службы zapret перед установкой/обновлением
     if [ -f /etc/init.d/zapret ]; then
         echo -e "${GREEN}🔴 ${CYAN}Останавливаем сервис ${NC}zapret"
         /etc/init.d/zapret stop >/dev/null 2>&1
         PIDS=$(pgrep -f /opt/zapret)
-        if [ -n "$PIDS" ]; then
-            echo -e "${GREEN}🔴 ${CYAN}Убиваем все процессы ${NC}zapret"
-            for pid in $PIDS; do kill -9 "$pid" >/dev/null 2>&1; done
-        fi
+        [ -n "$PIDS" ] && for pid in $PIDS; do kill -9 "$pid" >/dev/null 2>&1; done
     fi
 
-    # Создаем рабочую директорию и скачиваем архив
     mkdir -p "$WORKDIR" && cd "$WORKDIR" || return
     echo -e "${GREEN}🔴 ${CYAN}Скачиваем архив ${NC}$TARGET_FILE"
     wget -q "$TARGET_URL" -O "$TARGET_FILE" || { echo -e "${RED}Не удалось скачать ${NC}$TARGET_FILE"; read -p "Нажмите Enter для продолжения..." dummy; return; }
 
-    # Проверка наличия unzip для распаковки архива
     command -v unzip >/dev/null 2>&1 || { 
         echo -e "${GREEN}🔴 ${CYAN}Устанавливаем${NC} unzip ${CYAN}для распаковки архива${NC}"
         opkg update >/dev/null 2>&1
         opkg install unzip >/dev/null 2>&1
     }
 
-    # Распаковка архива
     echo -e "${GREEN}🔴 ${CYAN}Распаковываем архив${NC}"
     unzip -o "$TARGET_FILE" >/dev/null
 
-    # Завершаем старые процессы zapret перед установкой
     PIDS=$(pgrep -f /opt/zapret)
-    if [ -n "$PIDS" ]; then
-        echo -e "${GREEN}🔴 ${CYAN}Убиваем все процессы ${NC}zapret"
-        for pid in $PIDS; do kill -9 "$pid" >/dev/null 2>&1; done
-    fi
+    [ -n "$PIDS" ] && for pid in $PIDS; do kill -9 "$pid" >/dev/null 2>&1; done
 
-    # Установка пакетов из архива
     for PKG in zapret_*.ipk luci-app-zapret_*.ipk; do
         [ -f "$PKG" ] && {
             echo -e "${GREEN}🔴 ${CYAN}Устанавливаем пакет ${NC}$PKG"
@@ -169,13 +147,11 @@ install_update() {
         }
     done
 
-    # Очистка временных файлов после установки
     echo -e "${GREEN}🔴 ${CYAN}Удаляем временные файлы и пакеты${NC}"
     cd /
     rm -rf "$WORKDIR"
     rm -f /tmp/*.ipk /tmp/*.zip /tmp/*zapret* 2>/dev/null
 
-    # Перезапуск службы после установки
     [ -f /etc/init.d/zapret ] && {
         echo -e "${GREEN}🔴 ${CYAN}Перезапуск службы ${NC}zapret"
         chmod +x /opt/zapret/sync_config.sh
@@ -183,54 +159,14 @@ install_update() {
         /etc/init.d/zapret restart >/dev/null 2>&1
     }
 
-    # Сообщение об успешной установке или обновлении
     echo -e ""
-    echo -e "${BLUE}🔴 ${GREEN}Zapret успешно установлен/обновлён до версии $TARGET_VER !${NC}"
+    if [ "$ACTION" = "update" ]; then
+        echo -e "${BLUE}🔴 ${GREEN}Zapret успешно обновлён !${NC}"
+    else
+        echo -e "${BLUE}🔴 ${GREEN}Zapret успешно установлен !${NC}"
+    fi
     echo -e ""
     read -p "Нажмите Enter для продолжения..." dummy
-}
-
-
-# ==========================================
-# Выбор и установка конкретной версии из списка релизов GitHub
-# ==========================================
-choose_version() {
-    clear
-    echo -e ""
-    echo -e "${MAGENTA}Доступные версии Zapret (последние 10)${NC}"
-    echo -e ""
-
-    LOCAL_ARCH=$(awk -F\' '/DISTRIB_ARCH/ {print $2}' /etc/openwrt_release)
-    [ -z "$LOCAL_ARCH" ] && LOCAL_ARCH=$(opkg print-architecture | grep -v "noarch" | sort -k3 -n | tail -n1 | awk '{print $2}')
-
-    RELEASES=$(curl -s https://api.github.com/repos/remittor/zapret-openwrt/releases \
-        | grep '"tag_name"' | grep -Eo '[0-9]+\.[0-9]+[0-9]*' | head -n 10)
-
-    if [ -z "$RELEASES" ]; then
-        echo -e "${RED}Не удалось получить список версий${NC}"
-        read -p "Нажмите Enter для продолжения..." dummy
-        return
-    fi
-
-    i=1
-    echo "$RELEASES" | while read ver; do
-        echo -e "${GREEN}$i) ${NC}$ver"
-        i=$((i+1))
-    done
-
-    echo -e ""
-    echo -n "Введите номер версии для установки (или Enter для выхода): "
-    read num
-    [ -z "$num" ] && return
-
-    SELECTED=$(echo "$RELEASES" | sed -n "${num}p")
-    [ -z "$SELECTED" ] && { echo -e "${RED}Неверный номер${NC}"; sleep 2; return; }
-
-    echo -e ""
-    echo -e "${CYAN}Вы выбрали версию: ${GREEN}$SELECTED${NC}"
-    echo -e ""
-
-    install_update "$SELECTED"
 }
 
 # ==========================================
@@ -242,16 +178,9 @@ uninstall_zapret() {
     echo -e "${MAGENTA}Начинаем удаление ZAPRET${NC}"
     echo -e ""
 
-    [ -f /etc/init.d/zapret ] && {
-        echo -e "${GREEN}🔴 ${CYAN}Останавливаем сервис ${NC}zapret"
-        /etc/init.d/zapret stop >/dev/null 2>&1
-    }
-
+    [ -f /etc/init.d/zapret ] && { /etc/init.d/zapret stop >/dev/null 2>&1; }
     PIDS=$(pgrep -f /opt/zapret)
-    if [ -n "$PIDS" ]; then
-        echo -e "${GREEN}🔴 ${CYAN}Убиваем все процессы ${NC}zapret"
-        for pid in $PIDS; do kill -9 "$pid" >/dev/null 2>&1; done
-    fi
+    [ -n "$PIDS" ] && for pid in $PIDS; do kill -9 "$pid" >/dev/null 2>&1; done
 
     echo -e "${GREEN}🔴 ${CYAN}Удаляем пакеты${NC} zapret ${CYAN}и ${NC}luci-app-zapret"
     opkg remove --force-removal-of-dependent-packages zapret luci-app-zapret >/dev/null 2>&1
@@ -275,9 +204,20 @@ uninstall_zapret() {
         chains=$(nft list table $table 2>/dev/null | grep -i 'chain .*zapret' | awk '{print $2}')
         for chain in $chains; do nft delete chain $table $chain >/dev/null 2>&1; done
     done
+    for table in $(nft list tables 2>/dev/null | awk '{print $2}' | grep -i zapret); do nft delete table $table >/dev/null 2>&1; done
+
+    [ -f /etc/init.d/zapret ] && { /etc/init.d/zapret disable >/dev/null 2>&1; rm -f /etc/init.d/zapret; }
+
+    echo -e "${GREEN}🔴 ${CYAN}Удаляем${NC} hook ${CYAN}скрипты${NC}"
+    HOOK_DIR="/etc/hotplug.d/iface"
+    [ -d "$HOOK_DIR" ] && for f in "$HOOK_DIR"/*zapret*; do [ -f "$f" ] && rm -f "$f"; done
+
+    echo -e "${GREEN}🔴 ${CYAN}Удаляем оставшиеся файлы конфигурации${NC}"
+    EXTRA_FILES="/opt/zapret/config /opt/zapret/config.default /opt/zapret/ipset"
+    for f in $EXTRA_FILES; do [ -e "$f" ] && rm -rf "$f"; done
 
     echo -e ""
-    echo -e "${BLUE}🔴 ${GREEN}Zapret полностью удалён!${NC}"
+    echo -e "${BLUE}🔴 ${GREEN}Zapret полностью удалён !${NC}"
     echo -e ""
     read -p "Нажмите Enter для продолжения..." dummy
 }
@@ -286,37 +226,135 @@ uninstall_zapret() {
 # Главное меню
 # ==========================================
 show_menu() {
-    clear
     get_versions
-    echo -e "${MAGENTA}ZAPRET on remittor Manager by StressOzz${NC}"
+    clear
     echo -e ""
-    echo -e "Установленная версия: ${GREEN}$INSTALLED_VER${NC}"
-    [ -n "$ZAPRET_STATUS" ] && echo -e "Статус сервиса: $ZAPRET_STATUS"
-    echo -e "Последняя версия: ${GREEN}$LATEST_VER${NC}"
-    echo -e "Предыдущая версия: ${GREEN}$PREV_VER${NC}"
-    echo -e ""
-    echo -e "${CYAN}1) Установить последнюю версию${NC}"
-    echo -e "${CYAN}2) Установить предыдущую версию${NC}"
-    echo -e "${CYAN}3) Установить конкретную версию${NC}"
-    echo -e "${CYAN}4) Полностью удалить Zapret${NC}"
-    echo -e "${CYAN}5) Выйти${NC}"
-    echo -e ""
-    echo -n "Выберите действие: "
-    read choice
+    echo -e "███████╗ █████╗ ██████╗ ██████╗ ███████╗████████╗"
+    echo -e "╚══███╔╝██╔══██╗██╔══██╗██╔══██╗██╔════╝╚══██╔══╝"
+    echo -e "  ███╔╝ ███████║██████╔╝██████╔╝█████╗     ██║   "
+    echo -e " ███╔╝  ██╔══██║██╔═══╝ ██╔══██╗██╔══╝     ██║   "
+    echo -e "███████╗██║  ██║██║     ██║  ██║███████╗   ██║   "
+    echo -e "╚══════╝╚═╝  ╚═╝╚═╝     ╚═╝  ╚═╝╚══════╝   ╚═╝   "
+    echo -e "              ${MAGENTA}on remittor Manager by StressOzz${NC}"
+    echo -e "                                          ${DGRAY}v1.7${NC}"
+    echo -e "${GRAY}https://github.com/bol-van/zapret${NC}"
+    echo -e "${GRAY}https://github.com/remittor/zapret-openwrt${NC}"
 
+    [ "$INSTALLED_VER" = "$LATEST_VER" ] && INST_COLOR=$GREEN || INST_COLOR=$RED
+
+    if [ "$INSTALLED_VER" = "$LATEST_VER" ]; then
+        INSTALLED_DISPLAY="$INSTALLED_VER (актуальная)"
+        MENU1_TEXT="Установить последнюю версию"
+    elif [ "$INSTALLED_VER" != "не найдена" ]; then
+        INSTALLED_DISPLAY="$INSTALLED_VER (устарела)"
+        MENU1_TEXT="Обновить до последней версии"
+    else
+        INSTALLED_DISPLAY="$INSTALLED_VER"
+        MENU1_TEXT="Установить последнюю версию"
+    fi
+
+    echo -e ""
+    echo -e "${YELLOW}Установленная версия: ${INST_COLOR}$INSTALLED_DISPLAY${NC}"
+    echo -e "${YELLOW}Последняя версия на GitHub: ${NC}$LATEST_VER"
+    echo -e "${YELLOW}Предыдущая версия на GitHub: ${CYAN}$PREV_VER${NC}"
+    echo -e ""
+    echo -e "${YELLOW}Архитектура устройства: ${NC}$LOCAL_ARCH"
+    echo -e ""
+    [ -n "$ZAPRET_STATUS" ] && echo -e "${YELLOW}Статус службы Zapret: ${NC}$ZAPRET_STATUS"
+    echo -e ""
+
+    echo -e "${GREEN}1) $MENU1_TEXT${NC}"
+    echo -e "${GREEN}2) Установить предыдущую версию${NC}"
+    echo -e "${GREEN}3) Вернуть настройки по умолчанию${NC}"
+    echo -e "${GREEN}4) Удалить Zapret${NC}"
+    echo -e "${GREEN}5) Остановить Zapret${NC}"
+    echo -e "${GREEN}6) Запустить Zapret${NC}"
+    echo -e "${GREEN}7) Установить конкретную версию${NC}"
+    echo -e "${GREEN}8) Выход (Enter)${NC}"
+    echo -e ""
+    echo -n "Выберите пункт: "
+    read choice
     case "$choice" in
         1) install_update "latest" ;;
         2) install_update "prev" ;;
-        3) choose_version ;;
+        3)
+            clear
+            echo -e ""
+            echo -e "${MAGENTA}Возврат к настройкам по умолчанию${NC}"
+            echo -e ""
+            if [ -f /opt/zapret/restore-def-cfg.sh ]; then
+                [ -f /etc/init.d/zapret ] && /etc/init.d/zapret stop >/dev/null 2>&1
+                chmod +x /opt/zapret/restore-def-cfg.sh
+                /opt/zapret/restore-def-cfg.sh
+                chmod +x /opt/zapret/sync_config.sh
+                /opt/zapret/sync_config.sh
+                [ -f /etc/init.d/zapret ] && /etc/init.d/zapret restart >/dev/null 2>&1
+                echo -e "${BLUE}🔴 ${GREEN}Настройки возвращены, сервис перезапущен !${NC}"
+            else
+                echo -e "${RED}Zapret не установлен !${NC}"
+            fi
+            echo -e ""
+            read -p "Нажмите Enter для продолжения..." dummy
+            show_menu
+            ;;
         4) uninstall_zapret ;;
-        5) exit 0 ;;
-        *) echo -e "${RED}Неверный выбор${NC}"; sleep 2 ;;
+        5)
+            clear
+            echo -e ""
+            echo -e "${MAGENTA}Остановка Zapret${NC}"
+            echo -e ""
+            if [ -f /etc/init.d/zapret ]; then
+                echo -e "${GREEN}🔴 ${CYAN}Останавливаем сервис ${NC}Zapret"
+                /etc/init.d/zapret stop >/dev/null 2>&1
+                PIDS=$(pgrep -f /opt/zapret)
+                if [ -n "$PIDS" ]; then
+                    echo -e "${GREEN}🔴 ${CYAN}Убиваем все процессы ${NC}Zapret"
+                    for pid in $PIDS; do kill -9 "$pid" >/dev/null 2>&1; done
+                fi
+                echo -e ""
+                echo -e "${BLUE}🔴 ${GREEN}Zapret остановлен !${NC}"
+            else
+                echo -e "${RED}Zapret не установлен !${NC}"
+            fi
+            echo -e ""
+            read -p "Нажмите Enter для продолжения..." dummy
+            ;;
+        6)
+            clear
+            echo -e ""
+            echo -e "${MAGENTA}Запуск Zapret${NC}"
+            echo -e ""
+            if [ -f /etc/init.d/zapret ]; then
+                echo -e "${GREEN}🔴 ${CYAN}Запускаем сервис ${NC}Zapret"
+                /etc/init.d/zapret start >/dev/null 2>&1
+                echo -e ""
+                echo -e "${BLUE}🔴 ${GREEN}Zapret запущен !${NC}"
+            else
+                echo -e "${RED}Zapret не установлен !${NC}"
+            fi
+            echo -e ""
+            read -p "Нажмите Enter для продолжения..." dummy
+            ;;
+        7)
+            clear
+            echo -e ""
+            echo -e "${MAGENTA}Установка конкретной версии${NC}"
+            echo -e ""
+            echo -n "Введите версию (например 1.6): "
+            read user_ver
+            if [ -z "$user_ver" ]; then
+                echo -e "${RED}Версия не введена !${NC}"
+                read -p "Нажмите Enter для продолжения..." dummy
+                show_menu
+            else
+                install_update "$user_ver"
+            fi
+            ;;
+        *) exit 0 ;;
     esac
 }
 
 # ==========================================
-# Основной цикл
+# Старт скрипта
 # ==========================================
-while true; do
-    show_menu
-done
+show_menu
