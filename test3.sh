@@ -197,84 +197,41 @@ choose_version() {
     echo -e "${MAGENTA}Доступные версии Zapret (последние 10)${NC}"
     echo -e ""
 
-    # Проверяем наличие curl
-    command -v curl >/dev/null 2>&1 || {
-        echo -e "${GREEN}🔴 ${CYAN}Устанавливаем${NC} curl"
-        opkg update >/dev/null 2>&1
-        opkg install curl >/dev/null 2>&1
-    }
-
     # Определяем архитектуру
     LOCAL_ARCH=$(awk -F\' '/DISTRIB_ARCH/ {print $2}' /etc/openwrt_release)
     [ -z "$LOCAL_ARCH" ] && LOCAL_ARCH=$(opkg print-architecture | grep -v "noarch" | sort -k3 -n | tail -n1 | awk '{print $2}')
 
-    # Получаем список релизов
+    # Получаем последние версии
     RELEASES=$(curl -s https://api.github.com/repos/remittor/zapret-openwrt/releases \
-        | grep -E '"tag_name"|"published_at"|"browser_download_url"' \
-        | grep "$LOCAL_ARCH.zip" -A2 \
-        | awk -F'"' '/tag_name/{v=$4}/published_at/{d=$4}/browser_download_url/{u=$4; printf "%s|%s|%s\n", v, d, u}' \
-        | head -n 10)
+        | grep '"tag_name"' | grep -Eo '[0-9]+\.[0-9]+[0-9]*' | head -n 10)
 
     if [ -z "$RELEASES" ]; then
-        echo -e "${RED}Не удалось получить список релизов для архитектуры: ${NC}$LOCAL_ARCH"
+        echo -e "${RED}Не удалось получить список версий${NC}"
         read -p "Нажмите Enter для продолжения..." dummy
         return
     fi
 
-    # Формируем меню выбора
+    # Выводим список с номерами
     i=1
-    echo "$RELEASES" | while IFS='|' read -r VER DATE URL; do
-        SHORT_DATE=$(echo "$DATE" | cut -d'T' -f1)
-        printf "${GREEN}%2d)${NC} ${CYAN}Версия:${NC} %-10s ${GRAY}(%s)${NC}\n" "$i" "$VER" "$SHORT_DATE"
+    echo "$RELEASES" | while read ver; do
+        echo -e "${GREEN}$i) ${NC}$ver"
         i=$((i+1))
     done
 
     echo -e ""
     echo -n "Введите номер версии для установки (или Enter для выхода): "
     read num
-
-    # Проверка ввода
     [ -z "$num" ] && return
 
     SELECTED=$(echo "$RELEASES" | sed -n "${num}p")
     [ -z "$SELECTED" ] && { echo -e "${RED}Неверный номер${NC}"; sleep 2; return; }
 
-    VER=$(echo "$SELECTED" | cut -d'|' -f1)
-    DATE=$(echo "$SELECTED" | cut -d'|' -f2)
-    URL=$(echo "$SELECTED" | cut -d'|' -f3)
-    FILE=$(basename "$URL")
-
     echo -e ""
-    echo -e "${CYAN}Вы выбрали версию:${NC} ${GREEN}$VER${NC} (${GRAY}$DATE${NC})"
-    echo -e "${CYAN}Ссылка:${NC} $URL"
+    echo -e "${CYAN}Вы выбрали версию: ${GREEN}$SELECTED${NC}"
     echo -e ""
-    read -p "Установить эту версию? (y/n): " ans
-    [ "$ans" != "y" ] && return
 
-    # Скачиваем и устанавливаем выбранную версию
-    mkdir -p "$WORKDIR" && cd "$WORKDIR" || return
-    echo -e "${GREEN}🔴 ${CYAN}Скачиваем архив ${NC}$FILE"
-    wget -q "$URL" -O "$FILE" || { echo -e "${RED}Ошибка загрузки${NC}"; return; }
-
-    echo -e "${GREEN}🔴 ${CYAN}Распаковываем архив${NC}"
-    unzip -o "$FILE" >/dev/null
-
-    echo -e "${GREEN}🔴 ${CYAN}Останавливаем сервис ${NC}zapret"
-    /etc/init.d/zapret stop >/dev/null 2>&1
-    PIDS=$(pgrep -f /opt/zapret)
-    [ -n "$PIDS" ] && for pid in $PIDS; do kill -9 "$pid" >/dev/null 2>&1; done
-
-    for PKG in zapret_*.ipk luci-app-zapret_*.ipk; do
-        [ -f "$PKG" ] && opkg install --force-reinstall "$PKG" >/dev/null 2>&1
-    done
-
-    cd / && rm -rf "$WORKDIR"
-    /etc/init.d/zapret restart >/dev/null 2>&1
-
-    echo -e ""
-    echo -e "${BLUE}🔴 ${GREEN}Версия $VER успешно установлена!${NC}"
-    echo -e ""
-    read -p "Нажмите Enter для продолжения..." dummy
+    # Вызываем функцию установки/обновления с выбранной версией
+    install_update "$SELECTED"
 }
 
 
