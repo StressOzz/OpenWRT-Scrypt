@@ -82,64 +82,71 @@ get_versions() {
 install_update() {
     clear
     echo -e ""
-    # Определяем, обновление или установка
-    if [ "$INSTALLED_VER" != "не найдена" ]; then
-        echo -e "${MAGENTA}Начинаем обновление ZAPRET${NC}"
-        ACTION="update"
-    else
-        echo -e "${MAGENTA}Начинаем установку ZAPRET${NC}"
-        ACTION="install"
-    fi
-    echo -e ""
+
+    # Получаем версии, архитектуру и статус
     get_versions
 
-    # Выбираем целевую версию для установки
+    # Определяем, что за версия пришла
     TARGET="$1"
-    if [ "$TARGET" = "prev" ]; then
-        TARGET_URL="$PREV_URL"
-        TARGET_FILE="$PREV_FILE"
-        TARGET_VER="$PREV_VER"
-    else
-        TARGET_URL="$LATEST_URL"
-        TARGET_FILE="$LATEST_FILE"
-        TARGET_VER="$LATEST_VER"
-    fi
+    case "$TARGET" in
+        latest)
+            TARGET_URL="$LATEST_URL"
+            TARGET_FILE="$LATEST_FILE"
+            TARGET_VER="$LATEST_VER"
+            ACTION="install"
+            ;;
+        prev)
+            TARGET_URL="$PREV_URL"
+            TARGET_FILE="$PREV_FILE"
+            TARGET_VER="$PREV_VER"
+            ACTION="install"
+            ;;
+        *)
+            # TARGET - конкретная версия, например "1.7"
+            TARGET_VER="$TARGET"
+            ACTION="install"
+            # Ищем URL для выбранной версии
+            TARGET_URL=$(curl -s https://api.github.com/repos/remittor/zapret-openwrt/releases \
+                | grep browser_download_url | grep "zapret_v$TARGET_VER" | grep "$LOCAL_ARCH.zip" | cut -d '"' -f 4)
+            if [ -z "$TARGET_URL" ]; then
+                echo -e "${RED}Не найден пакет для версии $TARGET_VER и архитектуры $LOCAL_ARCH${NC}"
+                read -p "Нажмите Enter для продолжения..." dummy
+                return
+            fi
+            TARGET_FILE=$(basename "$TARGET_URL")
+            ;;
+    esac
 
-    # Проверка архитектуры на доступность пакета
+    # Проверка архитектуры
     [ "$USED_ARCH" = "нет пакета для вашей архитектуры" ] && {
         echo -e "${RED}Нет доступного пакета для вашей архитектуры: ${NC}$LOCAL_ARCH"
-        echo -e ""
         read -p "Нажмите Enter для продолжения..." dummy
         return
     }
 
-    # Если версия уже установлена, ничего не делаем
+    # Если версия уже установлена, выходим
     if [ "$INSTALLED_VER" = "$TARGET_VER" ]; then
         echo -e "${BLUE}🔴 ${GREEN}Эта версия уже установлена !${NC}"
-        echo -e ""
         read -p "Нажмите Enter для продолжения..." dummy
         return
     fi
 
-    # Остановка службы zapret перед установкой/обновлением
+    # Остановка службы
     if [ -f /etc/init.d/zapret ]; then
         echo -e "${GREEN}🔴 ${CYAN}Останавливаем сервис ${NC}zapret"
         /etc/init.d/zapret stop >/dev/null 2>&1
         PIDS=$(pgrep -f /opt/zapret)
-        if [ -n "$PIDS" ]; then
-            echo -e "${GREEN}🔴 ${CYAN}Убиваем все процессы ${NC}zapret"
-            for pid in $PIDS; do kill -9 "$pid" >/dev/null 2>&1; done
-        fi
+        [ -n "$PIDS" ] && for pid in $PIDS; do kill -9 "$pid" >/dev/null 2>&1; done
     fi
 
-    # Создаем рабочую директорию и скачиваем архив
+    # Создаем рабочую папку и скачиваем архив
     mkdir -p "$WORKDIR" && cd "$WORKDIR" || return
     echo -e "${GREEN}🔴 ${CYAN}Скачиваем архив ${NC}$TARGET_FILE"
-    wget -q "$TARGET_URL" -O "$TARGET_FILE" || { echo -e "${RED}Не удалось скачать ${NC}$TARGET_FILE"; read -p "Нажмите Enter для продолжения..." dummy; return; }
+    wget -q "$TARGET_URL" -O "$TARGET_FILE" || { echo -e "${RED}Не удалось скачать ${NC}$TARGET_FILE"; read -p "Enter..." dummy; return; }
 
-    # Проверка наличия unzip для распаковки архива
+    # Проверка unzip
     command -v unzip >/dev/null 2>&1 || { 
-        echo -e "${GREEN}🔴 ${CYAN}Устанавливаем${NC} unzip ${CYAN}для распаковки архива${NC}"
+        echo -e "${GREEN}🔴 ${CYAN}Устанавливаем${NC} unzip"
         opkg update >/dev/null 2>&1
         opkg install unzip >/dev/null 2>&1
     }
@@ -147,13 +154,6 @@ install_update() {
     # Распаковка архива
     echo -e "${GREEN}🔴 ${CYAN}Распаковываем архив${NC}"
     unzip -o "$TARGET_FILE" >/dev/null
-
-    # Завершаем старые процессы zapret перед установкой
-    PIDS=$(pgrep -f /opt/zapret)
-    if [ -n "$PIDS" ]; then
-        echo -e "${GREEN}🔴 ${CYAN}Убиваем все процессы ${NC}zapret"
-        for pid in $PIDS; do kill -9 "$pid" >/dev/null 2>&1; done
-    fi
 
     # Установка пакетов из архива
     for PKG in zapret_*.ipk luci-app-zapret_*.ipk; do
@@ -163,28 +163,20 @@ install_update() {
         }
     done
 
-    # Очистка временных файлов после установки
-    echo -e "${GREEN}🔴 ${CYAN}Удаляем временные файлы и пакеты${NC}"
+    # Очистка временных файлов
     cd /
-    rm -rf "$WORKDIR"
-    rm -f /tmp/*.ipk /tmp/*.zip /tmp/*zapret* 2>/dev/null
+    rm -rf "$WORKDIR" /tmp/*.ipk /tmp/*.zip /tmp/*zapret* 2>/dev/null
 
-    # Перезапуск службы после установки
+    # Перезапуск службы
     [ -f /etc/init.d/zapret ] && {
-        echo -e "${GREEN}🔴 ${CYAN}Перезапуск службы ${NC}zapret"
         chmod +x /opt/zapret/sync_config.sh
         /opt/zapret/sync_config.sh
         /etc/init.d/zapret restart >/dev/null 2>&1
     }
 
-    # Сообщение об успешной установке или обновлении
+    # Сообщение
     echo -e ""
-    if [ "$ACTION" = "update" ]; then
-        echo -e "${BLUE}🔴 ${GREEN}Zapret успешно обновлён !${NC}"
-    else
-        echo -e "${BLUE}🔴 ${GREEN}Zapret успешно установлен !${NC}"
-    fi
-    echo -e ""
+    echo -e "${BLUE}🔴 ${GREEN}Zapret версия $TARGET_VER успешно установлена!${NC}"
     read -p "Нажмите Enter для продолжения..." dummy
 }
 
