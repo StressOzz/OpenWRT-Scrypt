@@ -478,7 +478,7 @@ show_menu() {
             read -p "Нажмите Enter для продолжения..." dummy
             ;;
             
-        8) choose_version ;;
+        7) choose_version ;;
             
         *) exit 0 ;;  # Выход по Enter или любой другой невалидной опции
     esac
